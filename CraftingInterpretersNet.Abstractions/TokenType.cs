@@ -1,7 +1,8 @@
-﻿namespace CraftingInterpretersNet;
+﻿namespace CraftingInterpretersNet.Abstractions;
 
 public enum TokenType
 {
+  //@formatter:off
   // Single-character tokens.
   LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
   COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
@@ -20,4 +21,5 @@ public enum TokenType
   PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
 
   EOF
+  //@formatter:off
 }

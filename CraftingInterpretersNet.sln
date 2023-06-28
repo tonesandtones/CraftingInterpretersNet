@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CraftingInterpretersNet", "CraftingInterpretersNet\CraftingInterpretersNet.csproj", "{31E68392-F9C6-4418-9455-A8B78C851C6A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CraftingInterpretersNet.Abstractions", "CraftingInterpretersNet.Abstractions\CraftingInterpretersNet.Abstractions.csproj", "{36D5754D-425B-424B-9D4B-EB8A45D4005A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CraftingInterpretersNet.Generator", "CraftingInterpretersNet.Generator\CraftingInterpretersNet.Generator.csproj", "{170A5BBB-4E30-466F-9938-E83388C90ADD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{31E68392-F9C6-4418-9455-A8B78C851C6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E68392-F9C6-4418-9455-A8B78C851C6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31E68392-F9C6-4418-9455-A8B78C851C6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36D5754D-425B-424B-9D4B-EB8A45D4005A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36D5754D-425B-424B-9D4B-EB8A45D4005A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36D5754D-425B-424B-9D4B-EB8A45D4005A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36D5754D-425B-424B-9D4B-EB8A45D4005A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{170A5BBB-4E30-466F-9938-E83388C90ADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{170A5BBB-4E30-466F-9938-E83388C90ADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{170A5BBB-4E30-466F-9938-E83388C90ADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{170A5BBB-4E30-466F-9938-E83388C90ADD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

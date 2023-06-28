@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using static CraftingInterpretersNet.TokenType;
+using CraftingInterpretersNet.Abstractions;
+using static CraftingInterpretersNet.Abstractions.TokenType;
 
 namespace CraftingInterpretersNet;
 
@@ -129,7 +130,7 @@ public class Scanner
     Advance();
 
     //trim surrounding quotes
-    var value = source.Substring(start + 1, current - 1 - (start + 1));
+    var value = source[(start + 1) .. (current - 1)];
     AddToken(STRING, value);
   }
 
@@ -146,14 +147,14 @@ public class Scanner
 
     while (IsDigit(Peek())) Advance();
 
-    AddToken(NUMBER, double.Parse(source.Substring(start, current-start)));
+    AddToken(NUMBER, double.Parse(source[start..current]));
   }
 
   private void Identifier()
   {
     while (IsAlphaNumeric(Peek())) Advance();
 
-    var text = source.Substring(start, current-start);
+    var text = source[start .. current];
     var hasType = keywords.TryGetValue(text, out var type);
     if (!hasType) type = IDENTIFIER;
     AddToken(type);
@@ -192,7 +193,7 @@ public class Scanner
 
   private void AddToken(TokenType type, object? literal = null)
   {
-    var text = source.Substring(start, current-start);
+    var text = source[start .. current];
     tokens.Add(new Token(type, text, literal, line));
   }
 

@@ -1,4 +1,4 @@
-﻿namespace CraftingInterpretersNet;
+﻿namespace CraftingInterpretersNet.Abstractions;
 
 public class Token
 {
