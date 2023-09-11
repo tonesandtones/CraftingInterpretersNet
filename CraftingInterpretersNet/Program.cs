@@ -48,14 +48,14 @@ internal class Program
   {
     Scanner scanner = new(source);
     List<Token> tokens = scanner.ScanTokens();
-    Parser parser = new(tokens);
-    Expr? expression = parser.Parse();
-
-    if (HadError) return;
-    Console.WriteLine(new AstPrinter().Print(expression));
-    // foreach (var token in tokens)
-    // {
-    //   Console.WriteLine(token);
-    // }
+    // Parser parser = new(tokens);
+    // Expr? expression = parser.Parse();
+    //
+    // if (HadError) return;
+    // Console.WriteLine(new AstPrinter().Print(expression));
+    foreach (var token in tokens)
+    {
+      Console.WriteLine(token);
+    }
   }
 }
