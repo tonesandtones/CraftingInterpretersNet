@@ -9,8 +9,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\CraftingInterpretersNet.Abstractions\CraftingInterpretersNet.Abstractions.csproj"/>
-        <ProjectReference Include="..\CraftingInterpretersNet.Generator\CraftingInterpretersNet.Generator.csproj"
-                          OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
 </Project>

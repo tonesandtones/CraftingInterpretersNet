@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using static CraftingInterpretersNet.Generator.HelperExtensions;
 
 namespace CraftingInterpretersNet.Generator;
@@ -11,55 +9,34 @@ namespace CraftingInterpretersNet.Generator;
 [Generator]
 internal partial class ExprGenerator : IIncrementalGenerator
 {
-    private const string HelloClass = """
-//lang=c#
-namespace CraftingInterpretersNet
-{
-  public static class HelloConstants
-  {
-    public const string Hello = "Hello";
-  }
-}
-""";
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        context.RegisterPostInitializationOutput(PostInitialisationCallback);
-
-        //TODO generate the Expr classes. https://craftinginterpreters.com/representing-code.html#metaprogramming-the-trees
-        context.RegisterPostInitializationOutput(PastryGenerator);
+        context.RegisterPostInitializationOutput(AstTypesGenerator);
     }
 
-    private static void PostInitialisationCallback(IncrementalGeneratorPostInitializationContext ctx)
+    private static void AstTypesGenerator(IncrementalGeneratorPostInitializationContext context)
     {
-        ctx.AddSource(
-            "Hello.g.cs",
-            SourceText.From(HelloClass, Encoding.UTF8));
-    }
-
-    private static void PastryGenerator(IncrementalGeneratorPostInitializationContext context)
-    {
-        foreach (var kind in GenerationTargets.PastryAst)
+        foreach (var kind in GenerationTargets.DefinedAsts)
         {
-            context.AddSource($"{kind.Name}.g.cs", MakeSourceForAst(kind));
+            context.AddSource($"{kind.Name.ToPascalCase()}.g.cs", MakeSourceForAst(kind));
         }
     }
 
     private static string MakeSourceForAst(GenerationTargets.Ast kind)
     {
         var source = $$"""
-{{Preamble}}{{Environment.NewLine}}
+{{Preamble}}
 {{GeneratedCodeAttribute}}
-public abstract class {{kind.Name}}
+public abstract class {{kind.Name.ToPascalCase()}}
 {
     public abstract T Accept<T>(Visitor<T> visitor);{{Environment.NewLine}}
     {{GeneratedCodeAttribute}}
     public interface Visitor<out T>
     {
-{{kind.Targets.Select(x => $"{MakeIndent(2)}T Visit{x.Name}({x.Name} {kind.Name.ToCamelCase()});").Join(Environment.NewLine)}}
+{{kind.Targets.Select(x => $"{MakeIndent(2)}T Visit{x.Name.ToPascalCase()}({x.Name.ToPascalCase()} {kind.Name.ToCamelCase()});").Join(Environment.NewLine)}}
      }
      
-{{kind.Targets.Select(x => MakeEntityClass(x, kind.Name)).Join(Environment.NewLine).BlockIndent(1)}}
+{{kind.Targets.Select(x => MakeEntityClass(x, kind.Name.ToPascalCase())).Join(Environment.NewLine).BlockIndent(1)}}
 }
 
 """;
@@ -70,17 +47,17 @@ public abstract class {{kind.Name}}
     {
         var source = $$"""
 {{GeneratedCodeAttribute}}
-public class {{target.Name}} : {{baseClassName}}
+public class {{target.Name.ToPascalCase()}} : {{baseClassName}}
 {
-{{target.ArgumentList.Select(x => $"public {x.Type} {x.Name} {{ get; }}").Join(Environment.NewLine).BlockIndent(1)}}
-    public {{target.Name}}({{target.ArgumentList.Select(x => $"{x.Type} {x.Name.ToCamelCase()}").Join(", ")}})
+{{target.ArgumentList.Select(x => $"public {x.Type} {x.Name.ToPascalCase()} {{ get; }}").Join(Environment.NewLine).BlockIndent(1)}}
+    public {{target.Name.ToPascalCase()}}({{target.ArgumentList.Select(x => $"{x.Type} {x.Name.ToCamelCase()}").Join(", ")}})
     {
-{{target.ArgumentList.Select(x => $"{x.Name} = {x.Name.ToCamelCase()};").Join(Environment.NewLine).BlockIndent(2)}}
+{{target.ArgumentList.Select(x => $"{x.Name.ToPascalCase()} = {x.Name.ToCamelCase()};").Join(Environment.NewLine).BlockIndent(2)}}
     }
     
     public override T Accept<T>(Visitor<T> visitor)
     {
-        return visitor.Visit{{target.Name}}(this);
+        return visitor.Visit{{target.Name.ToPascalCase()}}(this);
     }
 }{{Environment.NewLine}}
 """;
@@ -106,6 +83,12 @@ public static class HelperExtensions
     {
         if (s is null or { Length: 0 }) return "";
         return char.ToLower(s[0]) + s.Substring(1);
+    }
+    
+    public static string ToPascalCase(this string s)
+    {
+        if (s is null or { Length: 0 }) return "";
+        return char.ToUpper(s[0]) + s.Substring(1);
     }
 
     public static string Join(this IEnumerable<string> enumerable, string delim)

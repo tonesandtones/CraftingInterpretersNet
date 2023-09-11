@@ -10,51 +10,58 @@ public static class GenerationTargets
 
     public record Ast(string Name, IEnumerable<Target> Targets);
 
-    public static readonly IEnumerable<Ast> PastryAst = new Ast[]
+    public static readonly IEnumerable<Ast> PastryAst = new[]
     {
-        new("Pastry", new Target[]
-        {
-            new("Doughnut",
-                new Argument[]
-                {
-                    new("string", "Colour"),
-                    new("bool", "Holey")
-                }),
-            new("Croissant", new Argument[]
-            {
-                new("List<string>", "Fillings")
-            })
-        })
+        AstOf("Pastry",
+            TargetOf("Doughnut",
+                ArgOf("string", "Colour"),
+                ArgOf("bool", "Holey")
+            ),
+            TargetOf("Croissant",
+                ArgOf("List<string>", "Fillings")))
     };
 
-    // public static readonly IEnumerable<Ast> DefinedAsts = new[]
-    // {
-    //     new Ast("Expr", new[]
-    //     {
-    //         new Target("Assign", "Token name, Expr value"),
-    //         new Target("Binary", "Expr left, Token operator, Expr right"),
-    //         new Target("Call", "Expr callee, Token paren, List<Expr> arguments"),
-    //         new Target("Get", "Expr object, Token name"),
-    //         new Target("Grouping", "Expr expression"),
-    //         new Target("Literal", "Object value"),
-    //         new Target("Logical", "Expr left, Token operator, Expr right"),
-    //         new Target("Set", "Expr object, Token name, Expr value"),
-    //         new Target("Super", "Token keyword, Token method"),
-    //         new Target("This", "Token keyword"),
-    //         new Target("Unary", "Token operator, Expr right"),
-    //         new Target("Variable", "Token name")
-    //     }),
-    //     new Ast("Stmt", new []
-    //     {
-    //         new Target("Block", "List<Stmt> statements"),
-    //         new Target("Class", "Token name, Expr.Variable superclass, List<Stmt.Function> methods"),
-    //         new Target("Expression", "Expr expression"),
-    //         new Target("Function", "Token name, List<Token> params, List<Stmt> body"),
-    //         new Target("If", "Expr condition, Stmt thenBranch, Stmt elseBranch"),
-    //         new Target("Print", "Expr expression"),
-    //         new Target("Return", "Token keyword, Expr value"),
-    //         new Target("Var", "Token name, Expr initializer"),
-    //         new Target("While", "Expr condition, Stmt body")
-    //     })
-    // };
+    public static readonly IEnumerable<Ast> DefinedAsts = new[]
+    {
+        AstOf("Expr",
+            TargetOf("Assign", ArgOf("Token", "name"), ArgOf("Expr", "value")),
+            TargetOf("Binary", ArgOf("Expr", "left"), ArgOf("Token", "op"), ArgOf("Expr", "right")),
+            TargetOf("Call", ArgOf("Expr", "callee"), ArgOf("Token", "paren"), ArgOf("List<Expr>", "arguments")),
+            TargetOf("Get", ArgOf("Expr", "obj"), ArgOf("Token", "name")),
+            TargetOf("Grouping", ArgOf("Expr", "expression")),
+            TargetOf("Literal", ArgOf("object", "value")),
+            TargetOf("Logical", ArgOf("Expr", "left"), ArgOf("Token", "op"), ArgOf("Expr", "right")),
+            TargetOf("Set", ArgOf("Expr", "obj"), ArgOf("Token", "name"), ArgOf("Expr", "value")),
+            TargetOf("Super", ArgOf("Token", "keyword"), ArgOf("Token", "method")),
+            TargetOf("This", ArgOf("Token", "keyword")),
+            TargetOf("Unary", ArgOf("Token", "op"), ArgOf("Expr", "right")),
+            TargetOf("Variable", ArgOf("Token", "name"))
+        ),
+        AstOf("Stmt",
+            TargetOf("Block", ArgOf("List<Stmt>", "statements")),
+            TargetOf("Class", ArgOf("Token", "name"), ArgOf("Expr.Variable", "superclass"), ArgOf("List<Stmt.Function>", "methods")),
+            TargetOf("ExpressionStmt", ArgOf("Expr", "expression")),
+            TargetOf("Function", ArgOf("Token", "name"), ArgOf("List<Token>", "par"), ArgOf("List<Stmt>", "body")),
+            TargetOf("If", ArgOf("Expr", "condition"), ArgOf("Stmt", "thenBranch"), ArgOf("Stmt", "elseBranch")),
+            TargetOf("Print", ArgOf("Expr", "expression")),
+            TargetOf("Return", ArgOf("Token", "keyword"), ArgOf("Expr", "value")),
+            TargetOf("Var", ArgOf("Token", "name"), ArgOf("Expr", "initializer")),
+            TargetOf("While", ArgOf("Expr", "condition"), ArgOf("Stmt", "body"))
+        )
+    };
+    
+    private static Ast AstOf(string name, params Target[] targets)
+    {
+        return new Ast(name, targets);
+    }
+
+    private static Target TargetOf(string name, params Argument[] arguments)
+    {
+        return new Target(name, arguments);
+    }
+
+    private static Argument ArgOf(string type, string name)
+    {
+        return new Argument(type, name);
+    }
 }
