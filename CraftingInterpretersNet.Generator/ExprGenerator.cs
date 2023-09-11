@@ -33,7 +33,7 @@ public abstract class {{kind.Name.ToPascalCase()}}
     {{GeneratedCodeAttribute}}
     public interface Visitor<out T>
     {
-{{kind.Targets.Select(x => $"{MakeIndent(2)}T Visit{x.Name.ToPascalCase()}({x.Name.ToPascalCase()} {kind.Name.ToCamelCase()});").Join(Environment.NewLine)}}
+{{kind.Targets.Select(x => $"{MakeIndent(2)}T Visit{x.Name.ToPascalCase()}{kind.Name.ToPascalCase()}({x.Name.ToPascalCase()} {kind.Name.ToCamelCase()});").Join(Environment.NewLine)}}
      }
      
 {{kind.Targets.Select(x => MakeEntityClass(x, kind.Name.ToPascalCase())).Join(Environment.NewLine).BlockIndent(1)}}
@@ -57,7 +57,7 @@ public class {{target.Name.ToPascalCase()}} : {{baseClassName}}
     
     public override T Accept<T>(Visitor<T> visitor)
     {
-        return visitor.Visit{{target.Name.ToPascalCase()}}(this);
+        return visitor.Visit{{target.Name.ToPascalCase()}}{{baseClassName}}(this);
     }
 }{{Environment.NewLine}}
 """;
