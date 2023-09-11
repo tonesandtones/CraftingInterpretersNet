@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CraftingInterpretersNet.Abstractions;
 using static CraftingInterpretersNet.Abstractions.TokenType;
 
@@ -6,12 +7,14 @@ namespace CraftingInterpretersNet;
 
 public class Scanner
 {
-  private readonly string source;
-  private readonly List<Token> tokens = new();
+  private readonly IErrorReporter _errorReporter;
+  
+  private readonly string _source;
+  private readonly List<Token> _tokens = new();
 
-  private int start = 0;
-  private int current = 0;
-  private int line = 1;
+  private int _start = 0;
+  private int _current = 0;
+  private int _line = 1;
 
   private static readonly Dictionary<string, TokenType> keywords = new()
   {
@@ -33,21 +36,27 @@ public class Scanner
     { "while", WHILE }
   };
 
-  public Scanner(string source)
+  public Scanner(string source): this(source, Defaults.DefaultErrorReporter)
   {
-    this.source = source;
+    _source = source;
+  }
+
+  public Scanner(string source, IErrorReporter errorReporter)
+  {
+    _errorReporter = errorReporter ?? throw new ArgumentNullException(nameof(errorReporter));
+    _source = source;
   }
 
   public List<Token> ScanTokens()
   {
     while (!IsAtEnd())
     {
-      start = current;
+      _start = _current;
       ScanToken();
     }
 
-    tokens.Add(new Token(EOF, "", null, line));
-    return tokens;
+    _tokens.Add(new Token(EOF, "", null, _line));
+    return _tokens;
   }
 
   private void ScanToken()
@@ -89,7 +98,7 @@ public class Scanner
         // Ignore whitespace.
         break;
       case '\n':
-        line++;
+        _line++;
         break;
       case '"':
         String();
@@ -105,7 +114,7 @@ public class Scanner
         }
         else
         {
-          Program.Error(line, "Unexpected character _" + c + "_");
+          _errorReporter.Error(_line, "Unexpected character _" + c + "_");
         }
 
         break;
@@ -116,13 +125,13 @@ public class Scanner
   {
     while (Peek() != '"' && !IsAtEnd())
     {
-      if (Peek() == '\n') line++;
+      if (Peek() == '\n') _line++;
       Advance();
     }
 
     if (IsAtEnd())
     {
-      Program.Error(line, "Unterminated String");
+      _errorReporter.Error(_line, "Unterminated String");
       return;
     }
 
@@ -130,7 +139,7 @@ public class Scanner
     Advance();
 
     //trim surrounding quotes
-    var value = source[(start + 1) .. (current - 1)];
+    var value = _source[(_start + 1) .. (_current - 1)];
     AddToken(STRING, value);
   }
 
@@ -147,14 +156,14 @@ public class Scanner
 
     while (IsDigit(Peek())) Advance();
 
-    AddToken(NUMBER, double.Parse(source[start..current]));
+    AddToken(NUMBER, double.Parse(_source[_start.._current]));
   }
 
   private void Identifier()
   {
     while (IsAlphaNumeric(Peek())) Advance();
 
-    var text = source[start .. current];
+    var text = _source[_start .. _current];
     var hasType = keywords.TryGetValue(text, out var type);
     if (!hasType) type = IDENTIFIER;
     AddToken(type);
@@ -162,39 +171,39 @@ public class Scanner
 
   private bool IsAtEnd()
   {
-    return current >= source.Length;
+    return _current >= _source.Length;
   }
 
   private char Advance()
   {
-    return source[current++];
+    return _source[_current++];
   }
 
   private bool Match(char expected)
   {
     if (IsAtEnd()) return false;
-    if (source[current] != expected) return false;
+    if (_source[_current] != expected) return false;
 
-    current++;
+    _current++;
     return true;
   }
 
   private char Peek()
   {
     if (IsAtEnd()) return '\0';
-    return source[current];
+    return _source[_current];
   }
 
   private char PeekNext()
   {
-    if (current + 1 >= source.Length) return '\0';
-    return source[current + 1];
+    if (_current + 1 >= _source.Length) return '\0';
+    return _source[_current + 1];
   }
 
   private void AddToken(TokenType type, object? literal = null)
   {
-    var text = source[start .. current];
-    tokens.Add(new Token(type, text, literal, line));
+    var text = _source[_start .. _current];
+    _tokens.Add(new Token(type, text, literal, _line));
   }
 
   private bool IsDigit(char c)

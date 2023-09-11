@@ -7,12 +7,18 @@ namespace CraftingInterpretersNet;
 
 public class Parser
 {
-    private readonly List<Token> tokens;
-    private int current = 0;
+    private readonly IErrorReporter _errorReporter;
+    private readonly List<Token> _tokens;
+    private int _current = 0;
 
-    public Parser(IEnumerable<Token> tokens)
+    public Parser(IEnumerable<Token> tokens): this(tokens, Defaults.DefaultErrorReporter)
     {
-        this.tokens = new List<Token>(tokens);
+    }
+
+    public Parser(IEnumerable<Token> tokens, IErrorReporter errorReporter)
+    {
+        _errorReporter = errorReporter;
+        _tokens = new List<Token>(tokens);
     }
 
     public Expr? Parse()
@@ -147,7 +153,7 @@ public class Parser
 
     private ParseErrorException Error(Token token, string message)
     {
-        Program.Error(token, message);
+        _errorReporter.Error(token, message);
         return new ParseErrorException();
     }
 
@@ -173,7 +179,7 @@ public class Parser
 
     private Token Advance()
     {
-        if (!IsAtEnd()) current++;
+        if (!IsAtEnd()) _current++;
         return Previous();
     }
 
@@ -184,12 +190,12 @@ public class Parser
 
     private Token Peek()
     {
-        return tokens[current];
+        return _tokens[_current];
     }
 
     private Token Previous()
     {
-        return tokens[current - 1];
+        return _tokens[_current - 1];
     }
     
     public class ParseErrorException : Exception
