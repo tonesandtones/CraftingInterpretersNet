@@ -23,14 +23,14 @@ public class Parser
 
     public Expr? Parse()
     {
-        // try
-        // {
-        return Expression();
-        // }
-        // catch (ParseErrorException e)
-        // {
-        //     return null;
-        // }
+        try
+        {
+            return Expression();
+        }
+        catch (ParseErrorException e)
+        {
+            return null;
+        }
     }
 
     private Expr Expression()
@@ -45,10 +45,11 @@ public class Parser
         Expr expr = Equality();
         if (Match(QUESTION))
         {
+            Token leftOperator = Previous();
             Expr left = Expression();
-            Consume(COLON, "Expect \':\' in ternary operator");
+            Token rightOperator = Consume(COLON, "Expect \':\' in ternary operator");
             Expr right = Expression();
-            expr = new Expr.Conditional(expr, left, right);
+            expr = new Expr.Conditional(expr, leftOperator, left, rightOperator, right);
         }
 
         return expr;

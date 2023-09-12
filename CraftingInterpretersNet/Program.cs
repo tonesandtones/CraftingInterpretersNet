@@ -7,7 +7,8 @@ namespace CraftingInterpretersNet;
 
 internal class Program
 {
-    private static bool HadError => Defaults.DefaultErrorReporter.HasReceivedError;
+    private static bool HadParseError => Defaults.DefaultErrorReporter.HasReceivedError;
+    private static bool HadRuntimeError => Defaults.DefaultRuntimeErrorReporter.HasRuntimeError;
 
     public static void Main(string[] args)
     {
@@ -28,7 +29,8 @@ internal class Program
         var contents = File.ReadAllText(path);
         Run(contents);
 
-        if (HadError) Environment.Exit(65);
+        if (HadParseError) Environment.Exit(65);
+        if (HadRuntimeError) Environment.Exit(70);
     }
 
     private static void RunPrompt()
@@ -41,6 +43,7 @@ internal class Program
             if (line == null) break;
             Run(line);
             Defaults.DefaultErrorReporter.ClearErrorState();
+            Defaults.DefaultRuntimeErrorReporter.ClearErrorState();
         }
     }
 
@@ -48,14 +51,18 @@ internal class Program
     {
         Scanner scanner = new(source);
         List<Token> tokens = scanner.ScanTokens();
-        // Parser parser = new(tokens);
-        // Expr? expression = parser.Parse();
-        //
-        // if (HadError) return;
+        Parser parser = new(tokens);
+        Expr? expression = parser.Parse();
+        Interpreter interpreter = new();
+        
+        if (HadParseError || expression is null) return;
         // Console.WriteLine(new AstPrinter().Print(expression));
-        foreach (var token in tokens)
-        {
-            Console.WriteLine(token);
-        }
+        string? result = interpreter.Interpret(expression);
+        Console.WriteLine(result);
+        
+        // foreach (var token in tokens)
+        // {
+        //     Console.WriteLine(token);
+        // }
     }
 }
