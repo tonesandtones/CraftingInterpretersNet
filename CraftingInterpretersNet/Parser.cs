@@ -21,26 +21,53 @@ public class Parser
         _tokens = new List<Token>(tokens);
     }
 
-    public Expr? Parse()
+    public IEnumerable<Stmt> Parse()
     {
+        List<Stmt> statements = new();
         try
         {
-            return Expression();
+            while (!IsAtEnd())
+            {
+                statements.Add(Statement());
+            }
         }
-        catch (ParseErrorException e)
+        catch (ParseErrorException)
         {
-            return null;
+            return Array.Empty<Stmt>();
         }
+
+        return statements;
+    }
+
+    private Stmt Statement()
+    {
+        if (Match(PRINT)) return PrintStatement();
+
+        return ExpressionStatement();
+    }
+
+    private Stmt PrintStatement()
+    {
+        Expr value = Expression();
+        Consume(SEMICOLON, "Expect ';' after a value.");
+        return new Stmt.Print(value);
+    }
+
+    private Stmt ExpressionStatement()
+    {
+        Expr expr = Expression();
+        Consume(SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
     }
 
     private Expr Expression()
     {
-        return Ternary2(); //Implemented as part of ch6 challenges https://craftinginterpreters.com/parsing-expressions.html#challenges
+        return Ternary(); //Implemented as part of ch6 challenges https://craftinginterpreters.com/parsing-expressions.html#challenges
         // return Equality(); //replace Ternary() with Expression() to go back to what the book does.
     }
 
     //ternary        → equality ( "?" expression ":" expression)* ;
-    private Expr Ternary2()
+    private Expr Ternary()
     {
         Expr expr = Equality();
         if (Match(QUESTION))

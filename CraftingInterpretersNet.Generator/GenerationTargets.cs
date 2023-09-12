@@ -43,10 +43,10 @@ public static class GenerationTargets
             TargetOf("Block", ArgOf("List<Stmt>", "statements")),
             TargetOf("Class", ArgOf("Token", "name"), ArgOf("Expr.Variable", "superclass"),
                 ArgOf("List<Stmt.Function>", "methods")),
-            TargetOf("ExpressionStmt", ArgOf("Expr", "expression")),
+            TargetOf("Expression", ArgOf("Expr", "expr")),
             TargetOf("Function", ArgOf("Token", "name"), ArgOf("List<Token>", "par"), ArgOf("List<Stmt>", "body")),
             TargetOf("If", ArgOf("Expr", "condition"), ArgOf("Stmt", "thenBranch"), ArgOf("Stmt", "elseBranch")),
-            TargetOf("Print", ArgOf("Expr", "expression")),
+            TargetOf("Print", ArgOf("Expr", "expr")),
             TargetOf("Return", ArgOf("Token", "keyword"), ArgOf("Expr", "value")),
             TargetOf("Var", ArgOf("Token", "name"), ArgOf("Expr", "initializer")),
             TargetOf("While", ArgOf("Expr", "condition"), ArgOf("Stmt", "body"))

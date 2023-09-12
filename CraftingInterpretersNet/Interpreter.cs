@@ -1,35 +1,56 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using CraftingInterpretersNet.Abstractions;
 using static CraftingInterpretersNet.Abstractions.TokenType;
 
 namespace CraftingInterpretersNet;
 
-public class Interpreter : BaseExprVisitor<object>
+public class Interpreter : BaseVisitor<object, object?>
 {
     private readonly IRuntimeErrorReporter _errorReporter;
+    private readonly IOutputSink _sink;
 
-    public Interpreter(): this(Defaults.DefaultRuntimeErrorReporter)
+    public Interpreter(): this(Defaults.DefaultRuntimeErrorReporter, Defaults.DefaultOutputSink)
     {
     }
 
-    public Interpreter(IRuntimeErrorReporter errorReporter)
+    public Interpreter(IRuntimeErrorReporter errorReporter, IOutputSink sink)
     {
         _errorReporter = errorReporter;
+        _sink = sink;
     }
 
-    public string? Interpret(Expr expr)
+    public void Interpret(IEnumerable<Stmt> statements)
     {
         try
         {
-            object value = Evaluate(expr);
-            return Stringify(value);
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
         }
         catch (RuntimeError e)
         {
             _errorReporter.Error(e);
-            return null;
         }
+    }
+
+    private void Execute(Stmt stmt)
+    {
+        stmt.Accept(this);
+    }
+
+    public override object? VisitExpressionStmt(Stmt.Expression stmt)
+    {
+        Evaluate(stmt.Expr);
+        return null;
+    }
+
+    public override object? VisitPrintStmt(Stmt.Print stmt)
+    {
+        object value = Evaluate(stmt.Expr);
+        _sink.Print(Stringify(value));
+        return null;
     }
 
     public override object VisitLiteralExpr(Expr.Literal expr)

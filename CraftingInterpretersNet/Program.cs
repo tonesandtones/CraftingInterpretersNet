@@ -50,19 +50,13 @@ internal class Program
     private static void Run(string source)
     {
         Scanner scanner = new(source);
-        List<Token> tokens = scanner.ScanTokens();
+        var tokens = scanner.ScanTokens();
         Parser parser = new(tokens);
-        Expr? expression = parser.Parse();
+        var statements = parser.Parse();
         Interpreter interpreter = new();
         
-        if (HadParseError || expression is null) return;
+        if (HadParseError) return;
         // Console.WriteLine(new AstPrinter().Print(expression));
-        string? result = interpreter.Interpret(expression);
-        Console.WriteLine(result);
-        
-        // foreach (var token in tokens)
-        // {
-        //     Console.WriteLine(token);
-        // }
+        interpreter.Interpret(statements);
     }
 }
