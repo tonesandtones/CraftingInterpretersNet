@@ -28,7 +28,7 @@ public class Parser
         {
             while (!IsAtEnd())
             {
-                statements.Add(Statement());
+                statements.Add(Declaration());
             }
         }
         catch (ParseErrorException)
@@ -37,6 +37,34 @@ public class Parser
         }
 
         return statements;
+    }
+
+    private Stmt Declaration()
+    {
+        try
+        {
+            if (Match(VAR)) return VarDeclaration();
+            return Statement();
+        }
+        catch (ParseErrorException)
+        {
+            Synchronise();
+            return null;
+        }
+    }
+
+    private Stmt VarDeclaration()
+    {
+        var name = Consume(IDENTIFIER, "Expect variable name.");
+
+        Expr? initialiser = null;
+        if (Match(EQUAL_EQUAL))
+        {
+            initialiser = Expression();
+        }
+
+        Consume(SEMICOLON, "Expect ';' after variable declaration");
+        return new Stmt.Var(name, initialiser);
     }
 
     private Stmt Statement()
@@ -62,7 +90,8 @@ public class Parser
 
     private Expr Expression()
     {
-        return Ternary(); //Implemented as part of ch6 challenges https://craftinginterpreters.com/parsing-expressions.html#challenges
+        return
+            Ternary(); //Implemented as part of ch6 challenges https://craftinginterpreters.com/parsing-expressions.html#challenges
         // return Equality(); //replace Ternary() with Expression() to go back to what the book does.
     }
 
@@ -153,6 +182,8 @@ public class Parser
         if (Match(NIL)) return new Expr.Literal(null);
 
         if (Match(NUMBER, STRING)) return new Expr.Literal(Previous().Literal);
+
+        if (Match(IDENTIFIER)) return new Expr.Variable(Previous());
 
         if (Match(LEFT_PAREN))
         {
