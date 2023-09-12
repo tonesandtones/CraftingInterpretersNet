@@ -1,5 +1,4 @@
-﻿using System.Net.Security;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -49,6 +48,8 @@ public class InterpreterTests
         yield return TestCase("print !false;", "true");
         yield return TestCase("print 1 + 2 * 3;", "7");
         yield return TestCase("print (2 + 2) * 3;", "12");
+
+        yield return TestCase("print 1; print 2;", "1", "2");
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]
