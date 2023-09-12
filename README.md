@@ -2,6 +2,18 @@
 
 A Lox implementation in C# written while following along to https://craftinginterpreters.com/
 
+## Building
+
+```
+> dotnet build
+> dotnet test
+
+-- To run mutation tests and generate the report
+> dotnet tool restore
+> cd CraftingInterpretersNet.Tests
+> dotnet stryker
+```
+
 ## Additional features
 * Support for Conditional (ternary) `? :` operator
   * Chapter 6, challenge 2 https://craftinginterpreters.com/parsing-expressions.html#challenges
@@ -9,3 +21,4 @@ A Lox implementation in C# written while following along to https://craftinginte
 
 ## Implementation differences
 * `Expr` and `Stmt` classes generated with a C# Source Generator, `CraftingInterpretersNet.Generator`
+
