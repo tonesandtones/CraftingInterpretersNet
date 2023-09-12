@@ -11,7 +11,7 @@ public class Parser
     private readonly List<Token> _tokens;
     private int _current = 0;
 
-    public Parser(IEnumerable<Token> tokens): this(tokens, Defaults.DefaultErrorReporter)
+    public Parser(IEnumerable<Token> tokens) : this(tokens, Defaults.DefaultErrorReporter)
     {
     }
 
@@ -23,19 +23,35 @@ public class Parser
 
     public Expr? Parse()
     {
-        try
-        {
-            return Expression();
-        }
-        catch (ParseErrorException e)
-        {
-            return null;
-        }
+        // try
+        // {
+        return Expression();
+        // }
+        // catch (ParseErrorException e)
+        // {
+        //     return null;
+        // }
     }
 
     private Expr Expression()
     {
-        return Equality();
+        return Ternary2(); //Implemented as part of ch6 challenges https://craftinginterpreters.com/parsing-expressions.html#challenges
+        // return Equality(); //replace Ternary() with Expression() to go back to what the book does.
+    }
+
+    //ternary        → equality ( "?" expression ":" expression)* ;
+    private Expr Ternary2()
+    {
+        Expr expr = Equality();
+        if (Match(QUESTION))
+        {
+            Expr left = Expression();
+            Consume(COLON, "Expect \':\' in ternary operator");
+            Expr right = Expression();
+            expr = new Expr.Conditional(expr, left, right);
+        }
+
+        return expr;
     }
 
     private Expr Equality()
@@ -76,7 +92,7 @@ public class Parser
 
         return expr;
     }
-    
+
     private Expr Factor()
     {
         Expr expr = Unary();
@@ -116,6 +132,7 @@ public class Parser
             Consume(RIGHT_PAREN, "Expect ')' after expression");
             return new Expr.Grouping(expr);
         }
+
         throw Error(Peek(), "Expect expression.");
     }
 
@@ -197,7 +214,7 @@ public class Parser
     {
         return _tokens[_current - 1];
     }
-    
+
     public class ParseErrorException : Exception
     {
     }

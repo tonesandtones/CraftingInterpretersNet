@@ -6,11 +6,13 @@ public abstract class BaseErrorReporter : IErrorReporter
 
     public virtual void Error(int line, string message)
     {
+        HasReceivedError = true;
         Report(line, "", message);
     }
 
     public virtual void Error(Token token, string message)
     {
+        HasReceivedError = true;
         if (token.Type == TokenType.EOF)
         {
             Report(token.Line, " at end", message);

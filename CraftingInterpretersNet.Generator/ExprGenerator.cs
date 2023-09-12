@@ -24,6 +24,7 @@ internal partial class ExprGenerator : IIncrementalGenerator
 
     private static string MakeSourceForAst(GenerationTargets.Ast kind)
     {
+//@formatter:off
         var source = $$"""
 {{Preamble}}
 {{GeneratedCodeAttribute}}
@@ -40,11 +41,13 @@ public abstract class {{kind.Name.ToPascalCase()}}
 }
 
 """;
+//@formatter:on
         return source;
     }
 
     private static string MakeEntityClass(GenerationTargets.Target target, string baseClassName)
     {
+//@formatter:off
         var source = $$"""
 {{GeneratedCodeAttribute}}
 public class {{target.Name.ToPascalCase()}} : {{baseClassName}}
@@ -61,6 +64,7 @@ public class {{target.Name.ToPascalCase()}} : {{baseClassName}}
     }
 }{{Environment.NewLine}}
 """;
+//@formatter:on
         return source;
     }
 }
@@ -84,7 +88,7 @@ public static class HelperExtensions
         if (s is null or { Length: 0 }) return "";
         return char.ToLower(s[0]) + s.Substring(1);
     }
-    
+
     public static string ToPascalCase(this string s)
     {
         if (s is null or { Length: 0 }) return "";
@@ -95,5 +99,4 @@ public static class HelperExtensions
     {
         return string.Join(delim, enumerable);
     }
-    
 }

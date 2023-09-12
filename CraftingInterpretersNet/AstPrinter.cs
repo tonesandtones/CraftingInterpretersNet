@@ -15,10 +15,10 @@ public class AstPrinter : BaseExprVisitor<string>
             new Token(TokenType.STAR, "*", null, 1),
             new Expr.Grouping(
                 new Expr.Literal(45.67)));
-        
+
         Console.WriteLine(new AstPrinter().Print(expression));
     }
-    
+
     public string? Print(Expr? expr)
     {
         return expr?.Accept(this);
@@ -27,6 +27,11 @@ public class AstPrinter : BaseExprVisitor<string>
     private string Parenthesise(string name, params Expr[] exprs)
     {
         return $"({name} {string.Join(' ', exprs.Select(x => x.Accept(this)))})";
+    }
+
+    public override string VisitConditionalExpr(Expr.Conditional expr)
+    {
+        return Parenthesise("?:", expr.Condition, expr.Left, expr.Right);
     }
 
     public override string VisitBinaryExpr(Expr.Binary expr)

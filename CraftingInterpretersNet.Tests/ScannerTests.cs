@@ -8,7 +8,7 @@ namespace CraftingInterpretersNet.Tests;
 public class ScannerTests
 {
     private readonly CollectingErrorReporter _errorReporter = new();
-    
+
     private List<Token> ScannedTokens(string source)
     {
         Scanner s = new(source, _errorReporter);
@@ -16,7 +16,7 @@ public class ScannerTests
     }
 
     //todo - test cases for deeper comparison involving the token type, lexeme, literal, and line
-    
+
     [MemberData(nameof(ScannerTokenOrderTestData))]
     [Theory]
     public void ScannerProducesTokensWithTokenTypeInExpectedOrder(string lox, IEnumerable<TokenType> expectedTokenTypes)
@@ -40,6 +40,8 @@ public class ScannerTests
         yield return TestCase(";", SEMICOLON);
         yield return TestCase("/", SLASH);
         yield return TestCase("*", STAR);
+        yield return TestCase("?", QUESTION);
+        yield return TestCase(":", COLON);
         yield return TestCase("!", BANG);
         yield return TestCase("!=", BANG_EQUAL);
         yield return TestCase("=", EQUAL);
@@ -73,7 +75,8 @@ public class ScannerTests
 
         yield return TestCase("for (var ab = 123 )", FOR, LEFT_PAREN, VAR, IDENTIFIER, EQUAL, NUMBER, RIGHT_PAREN);
         yield return TestCase("-1", MINUS, NUMBER);
-        yield return TestCase("while a;\n\nabcd > \"abc\"\n", WHILE, IDENTIFIER, SEMICOLON, IDENTIFIER, GREATER, STRING);
+        yield return TestCase("while a;\n\nabcd > \"abc\"\n", WHILE, IDENTIFIER, SEMICOLON, IDENTIFIER, GREATER,
+            STRING);
     }
 
     private static object[] TestCase(string lox, params TokenType[] tokenTypes)

@@ -2,6 +2,11 @@
 
 public abstract class BaseExprVisitor<T> : Expr.Visitor<T>
 {
+    public virtual T VisitConditionalExpr(Expr.Conditional expr)
+    {
+        return default;
+    }
+
     public virtual T VisitAssignExpr(Expr.Assign expr)
     {
         return default;

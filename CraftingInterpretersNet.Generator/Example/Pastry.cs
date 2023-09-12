@@ -5,7 +5,7 @@ namespace CraftingInterpretersNet.Generator.Example;
 public abstract class Pastry
 {
     public abstract T Accept<T>(Visitor<T> visitor);
-    
+
     public interface Visitor<out T>
     {
         T VisitDoughnut(Doughnut pastry);

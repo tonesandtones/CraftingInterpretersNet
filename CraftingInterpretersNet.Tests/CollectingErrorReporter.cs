@@ -4,7 +4,7 @@ namespace CraftingInterpretersNet.Tests;
 
 public class CollectingErrorReporter : BaseErrorReporter
 {
-    private readonly List<Event> _receivedErrors = new List<Event>();
+    private readonly List<Event> _receivedErrors = new();
 
     public record Event(int Line, string Where, string Message);
 
