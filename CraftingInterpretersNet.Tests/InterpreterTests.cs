@@ -95,6 +95,14 @@ public class InterpreterTests
             print a;
             """,
             "1", "3", "1");
+        yield return TestCase(
+            """
+            var a = 1;
+            var b;
+            if (a == 1) { b = "truthy"; } else { b = "falsey"; }
+            print b;
+            """,
+            "truthy");
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]

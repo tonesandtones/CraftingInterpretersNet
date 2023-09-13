@@ -26,8 +26,7 @@ public static class GenerationTargets
         AstOf("Expr",
             TargetOf("Assign", ArgOf("Token", "name"), ArgOf("Expr", "value")),
             TargetOf("Binary", ArgOf("Expr", "left"), ArgOf("Token", "oper"), ArgOf("Expr", "right")),
-            TargetOf("Conditional", ArgOf("Expr", "condition"), ArgOf("Token", "leftOperator"), ArgOf("Expr", "left"),
-                ArgOf("Token", "rightOperator"), ArgOf("Expr", "right")),
+            TargetOf("Conditional", ArgOf("Expr", "condition"), ArgOf("Expr", "left"), ArgOf("Expr", "right")),
             TargetOf("Call", ArgOf("Expr", "callee"), ArgOf("Token", "paren"), ArgOf("List<Expr>", "arguments")),
             TargetOf("Get", ArgOf("Expr", "obj"), ArgOf("Token", "name")),
             TargetOf("Grouping", ArgOf("Expr", "expression")),
@@ -45,10 +44,10 @@ public static class GenerationTargets
                 ArgOf("List<Stmt.Function>", "methods")),
             TargetOf("Expression", ArgOf("Expr", "expr")),
             TargetOf("Function", ArgOf("Token", "name"), ArgOf("List<Token>", "par"), ArgOf("List<Stmt>", "body")),
-            TargetOf("If", ArgOf("Expr", "condition"), ArgOf("Stmt", "thenBranch"), ArgOf("Stmt", "elseBranch")),
+            TargetOf("If", ArgOf("Expr", "condition"), ArgOf("Stmt", "thenBranch"), ArgOf("Stmt?", "elseBranch")),
             TargetOf("Print", ArgOf("Expr", "expr")),
             TargetOf("Return", ArgOf("Token", "keyword"), ArgOf("Expr", "value")),
-            TargetOf("Var", ArgOf("Token", "name"), ArgOf("Expr", "initializer")),
+            TargetOf("Var", ArgOf("Token", "name"), ArgOf("Expr?", "initializer")),
             TargetOf("While", ArgOf("Expr", "condition"), ArgOf("Stmt", "body"))
         )
     };

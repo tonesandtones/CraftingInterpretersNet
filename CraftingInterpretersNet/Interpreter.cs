@@ -11,7 +11,7 @@ public class Interpreter : BaseVisitor<object, object?>
     private readonly IOutputSink _sink;
     private Environment _environment = new();
 
-    public Interpreter(): this(Defaults.DefaultRuntimeErrorReporter, Defaults.DefaultOutputSink)
+    public Interpreter() : this(Defaults.DefaultRuntimeErrorReporter, Defaults.DefaultOutputSink)
     {
     }
 
@@ -64,6 +64,20 @@ public class Interpreter : BaseVisitor<object, object?>
         }
     }
 
+    public override object? VisitIfStmt(Stmt.If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.ThenBranch);
+        }
+        else if (stmt.ElseBranch != null)
+        {
+            Execute(stmt.ElseBranch);
+        }
+
+        return null;
+    }
+
     public override object? VisitVarStmt(Stmt.Var stmt)
     {
         object? value = null;
@@ -71,7 +85,7 @@ public class Interpreter : BaseVisitor<object, object?>
         {
             value = Evaluate(stmt.Initializer);
         }
-        
+
         _environment.Define(stmt.Name.Lexeme, value);
         return null;
     }
@@ -217,7 +231,7 @@ public class Interpreter : BaseVisitor<object, object?>
     {
         if (left is double && right is double ||
             left is string && right is string) return;
-        
+
         //need to clean up this message.
         //Shouldn't expose C# "Double" or "String" name. Instead should return "number" and "string"
         throw new RuntimeError(@operator, $"Both operands must be the same type and both strings or numbers. " +

@@ -69,10 +69,27 @@ public class Parser
 
     private Stmt Statement()
     {
+        if (Match(IF)) return IfStatement();
         if (Match(PRINT)) return PrintStatement();
         if (Match(LEFT_BRACE)) return new Stmt.Block(Block());
 
         return ExpressionStatement();
+    }
+
+    private Stmt IfStatement()
+    {
+        Consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = Expression();
+        Consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = Statement();
+        Stmt? elseBranch = null;
+        if (Match(ELSE))
+        {
+            elseBranch = Statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
     private List<Stmt> Block()
@@ -131,11 +148,10 @@ public class Parser
         Expr expr = Equality();
         if (Match(QUESTION))
         {
-            Token leftOperator = Previous();
             Expr left = Expression();
-            Token rightOperator = Consume(COLON, "Expect \':\' in ternary operator");
+            Consume(COLON, "Expect \':\' in ternary operator");
             Expr right = Expression();
-            expr = new Expr.Conditional(expr, leftOperator, left, rightOperator, right);
+            expr = new Expr.Conditional(expr, left, right);
         }
 
         return expr;
