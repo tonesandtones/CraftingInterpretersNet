@@ -193,6 +193,21 @@ public class Interpreter : BaseVisitor<object, object?>
         return IsTruthy(condition) ? Evaluate(expr.Left) : Evaluate(expr.Right);
     }
 
+    public override object? VisitLogicalExpr(Expr.Logical expr)
+    {
+        object? left = Evaluate(expr.Left);
+        if (expr.Oper.Type == OR)
+        {
+            if (IsTruthy(left)) return left;
+        }
+        else
+        {
+            if (!IsTruthy(left)) return left;
+        }
+
+        return Evaluate(expr.Right);
+    }
+
     private object? Evaluate(Expr expr)
     {
         return expr.Accept(this);

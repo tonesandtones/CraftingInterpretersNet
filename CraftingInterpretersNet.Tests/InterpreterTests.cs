@@ -103,6 +103,8 @@ public class InterpreterTests
             print b;
             """,
             "truthy");
+        yield return TestCase("""print "hi" or 2;""", "hi");
+        yield return TestCase("""print nil or "yes";""", "yes");
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]

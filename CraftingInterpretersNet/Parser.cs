@@ -125,7 +125,7 @@ public class Parser
 
     private Expr Assignment()
     {
-        Expr expr = Ternary();
+        Expr expr = Or();
         if (Match(EQUAL))
         {
             Token equals = Previous();
@@ -137,6 +137,34 @@ public class Parser
             }
 
             Error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private Expr Or()
+    {
+        Expr expr = And();
+
+        while (Match(OR))
+        {
+            Token @operator = Previous();
+            Expr right = And();
+            expr = new Expr.Logical(expr, @operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr And()
+    {
+        Expr expr = Ternary();
+
+        while (Match(AND))
+        {
+            Token @operator = Previous();
+            Expr right = Ternary();
+            expr = new Expr.Logical(expr, @operator, right);
         }
 
         return expr;
