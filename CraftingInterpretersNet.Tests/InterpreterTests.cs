@@ -50,6 +50,15 @@ public class InterpreterTests
         yield return TestCase("print (2 + 2) * 3;", "12");
 
         yield return TestCase("print 1; print 2;", "1", "2");
+        yield return TestCase("""var a = "a"; print a;""", "a");
+        yield return TestCase("var a; a = 1; print a;", "1");
+        yield return TestCase("""
+                              var a = 1;
+                              var b;
+                              b = a >=2 ? "yes" : "no";
+                              print a;
+                              print b;
+                              """, "1", "no");
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]
@@ -71,6 +80,7 @@ public class InterpreterTests
         yield return TestCase("\"a\" + nil;", "Both operands must be the same type and both strings or numbers. Left is String, right is nil");
         yield return TestCase("nil * 1;", "Operands must be numbers.");
         yield return TestCase("-nil;", "Operand must be a number.");
+        yield return TestCase("xyz = 1;", "Undefined variable 'xyz'.");
     }
 
     private void Interpret(string lox)
