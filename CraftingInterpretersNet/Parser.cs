@@ -70,8 +70,21 @@ public class Parser
     private Stmt Statement()
     {
         if (Match(PRINT)) return PrintStatement();
+        if (Match(LEFT_BRACE)) return new Stmt.Block(Block());
 
         return ExpressionStatement();
+    }
+
+    private List<Stmt> Block()
+    {
+        List<Stmt> statements = new();
+        while (!Check(RIGHT_BRACE) && !IsAtEnd())
+        {
+            statements.Add(Declaration());
+        }
+
+        Consume(RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
     }
 
     private Stmt PrintStatement()

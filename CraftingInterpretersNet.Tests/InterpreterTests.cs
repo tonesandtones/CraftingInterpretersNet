@@ -59,6 +59,42 @@ public class InterpreterTests
                               print a;
                               print b;
                               """, "1", "no");
+        yield return TestCase(
+            """
+            var a = "global a";
+            var b = "global b";
+            var c = "global c";
+            {
+              var a = "outer a";
+              var b = "outer b";
+              {
+                var a = "inner a";
+                print a;
+                print b;
+                print c;
+              }
+              print a;
+              print b;
+              print c;
+            }
+            print a;
+            print b;
+            print c;
+            """,
+            "inner a", "outer b", "global c",
+            "outer a", "outer b", "global c",
+            "global a", "global b", "global c");
+        yield return TestCase(
+            """
+            var a = 1;
+            {
+              print 1;
+              var a = a + 2;
+              print a;
+            }
+            print a;
+            """,
+            "1", "3", "1");
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]

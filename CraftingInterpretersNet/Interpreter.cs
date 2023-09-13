@@ -9,7 +9,7 @@ public class Interpreter : BaseVisitor<object, object?>
 {
     private readonly IRuntimeErrorReporter _errorReporter;
     private readonly IOutputSink _sink;
-    private readonly Environment _environment = new();
+    private Environment _environment = new();
 
     public Interpreter(): this(Defaults.DefaultRuntimeErrorReporter, Defaults.DefaultOutputSink)
     {
@@ -39,6 +39,29 @@ public class Interpreter : BaseVisitor<object, object?>
     private void Execute(Stmt stmt)
     {
         stmt.Accept(this);
+    }
+
+    public override object? VisitBlockStmt(Stmt.Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new Environment(_environment));
+        return null;
+    }
+
+    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    {
+        Environment previous = _environment;
+        try
+        {
+            _environment = environment;
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            _environment = previous;
+        }
     }
 
     public override object? VisitVarStmt(Stmt.Var stmt)
