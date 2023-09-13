@@ -21,13 +21,13 @@ public class Interpreter : BaseVisitor<object, object?>
         _sink = sink;
     }
 
-    public void Interpret(IEnumerable<Stmt> statements)
+    public void Interpret(IEnumerable<Stmt?> statements)
     {
         try
         {
             foreach (var statement in statements)
             {
-                Execute(statement);
+                if (statement != null) Execute(statement);
             }
         }
         catch (RuntimeError e)
@@ -49,7 +49,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     private void ExecuteBlock(List<Stmt> statements, Environment environment)
     {
-        Environment previous = _environment;
+        var previous = _environment;
         try
         {
             _environment = environment;
@@ -97,7 +97,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitAssignExpr(Expr.Assign expr)
     {
-        object? value = Evaluate(expr.Value);
+        var value = Evaluate(expr.Value);
         _environment.Assign(expr.Name, value);
         return value;
     }
@@ -110,7 +110,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitPrintStmt(Stmt.Print stmt)
     {
-        object? value = Evaluate(stmt.Expr);
+        var value = Evaluate(stmt.Expr);
         _sink.Print(Stringify(value));
         return null;
     }
@@ -127,7 +127,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitUnaryExpr(Expr.Unary expr)
     {
-        object? right = Evaluate(expr.Right);
+        var right = Evaluate(expr.Right);
         // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (expr.Oper.Type)
         {
@@ -145,8 +145,8 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitBinaryExpr(Expr.Binary expr)
     {
-        object? left = Evaluate(expr.Left);
-        object? right = Evaluate(expr.Right);
+        var left = Evaluate(expr.Left);
+        var right = Evaluate(expr.Right);
 
         switch (expr.Oper.Type)
         {
@@ -188,7 +188,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitConditionalExpr(Expr.Conditional expr)
     {
-        object? condition = Evaluate(expr.Condition);
+        var condition = Evaluate(expr.Condition);
 
         return IsTruthy(condition) ? Evaluate(expr.Left) : Evaluate(expr.Right);
     }
@@ -205,7 +205,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitLogicalExpr(Expr.Logical expr)
     {
-        object? left = Evaluate(expr.Left);
+        var left = Evaluate(expr.Left);
         if (expr.Oper.Type == OR)
         {
             if (IsTruthy(left)) return left;

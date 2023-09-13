@@ -43,8 +43,7 @@ public class Parser
     {
         try
         {
-            if (Match(VAR)) return VarDeclaration();
-            return Statement();
+            return Match(VAR) ? VarDeclaration() : Statement();
         }
         catch (ParseErrorException)
         {
@@ -102,7 +101,7 @@ public class Parser
         if (!Check(RIGHT_PAREN)) increment = Expression();
         Consume(RIGHT_PAREN, "Expect ')' after for clauses");
 
-        Stmt body = Statement();
+        var body = Statement();
         if (increment != null)
         {
             body = new Stmt.Block(
@@ -120,9 +119,9 @@ public class Parser
     private Stmt WhileStatement()
     {
         Consume(LEFT_PAREN, "Expect '(' after 'while'.");
-        Expr condition = Expression();
+        var condition = Expression();
         Consume(RIGHT_PAREN, "Expect ')' after condition.");
-        Stmt body = Statement();
+        var body = Statement();
 
         return new Stmt.While(condition, body);
     }
@@ -130,10 +129,10 @@ public class Parser
     private Stmt IfStatement()
     {
         Consume(LEFT_PAREN, "Expect '(' after 'if'.");
-        Expr condition = Expression();
+        var condition = Expression();
         Consume(RIGHT_PAREN, "Expect ')' after if condition.");
 
-        Stmt thenBranch = Statement();
+        var thenBranch = Statement();
         Stmt? elseBranch = null;
         if (Match(ELSE))
         {
@@ -157,14 +156,14 @@ public class Parser
 
     private Stmt PrintStatement()
     {
-        Expr value = Expression();
+        var value = Expression();
         Consume(SEMICOLON, "Expect ';' after a value.");
         return new Stmt.Print(value);
     }
 
     private Stmt ExpressionStatement()
     {
-        Expr expr = Expression();
+        var expr = Expression();
         Consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
     }
@@ -176,14 +175,14 @@ public class Parser
 
     private Expr Assignment()
     {
-        Expr expr = Or();
+        var expr = Or();
         if (Match(EQUAL))
         {
-            Token equals = Previous();
-            Expr value = Assignment();
+            var equals = Previous();
+            var value = Assignment();
             if (expr is Expr.Variable ev)
             {
-                Token name = ev.Name;
+                var name = ev.Name;
                 return new Expr.Assign(name, value);
             }
 
@@ -195,12 +194,12 @@ public class Parser
 
     private Expr Or()
     {
-        Expr expr = And();
+        var expr = And();
 
         while (Match(OR))
         {
-            Token @operator = Previous();
-            Expr right = And();
+            var @operator = Previous();
+            var right = And();
             expr = new Expr.Logical(expr, @operator, right);
         }
 
@@ -209,12 +208,12 @@ public class Parser
 
     private Expr And()
     {
-        Expr expr = Ternary();
+        var expr = Ternary();
 
         while (Match(AND))
         {
-            Token @operator = Previous();
-            Expr right = Ternary();
+            var @operator = Previous();
+            var right = Ternary();
             expr = new Expr.Logical(expr, @operator, right);
         }
 
@@ -224,12 +223,12 @@ public class Parser
     //ternary        → equality ( "?" expression ":" expression)* ;
     private Expr Ternary()
     {
-        Expr expr = Equality();
+        var expr = Equality();
         if (Match(QUESTION))
         {
-            Expr left = Expression();
+            var left = Expression();
             Consume(COLON, "Expect \':\' in ternary operator");
-            Expr right = Expression();
+            var right = Expression();
             expr = new Expr.Conditional(expr, left, right);
         }
 
@@ -238,11 +237,11 @@ public class Parser
 
     private Expr Equality()
     {
-        Expr expr = Comparison();
+        var expr = Comparison();
         while (Match(BANG_EQUAL, EQUAL_EQUAL))
         {
-            Token @operator = Previous();
-            Expr right = Comparison();
+            var @operator = Previous();
+            var right = Comparison();
             expr = new Expr.Binary(expr, @operator, right);
         }
 
@@ -251,11 +250,11 @@ public class Parser
 
     private Expr Comparison()
     {
-        Expr expr = Term();
+        var expr = Term();
         while (Match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL))
         {
-            Token @operator = Previous();
-            Expr right = Term();
+            var @operator = Previous();
+            var right = Term();
             expr = new Expr.Binary(expr, @operator, right);
         }
 
@@ -264,11 +263,11 @@ public class Parser
 
     private Expr Term()
     {
-        Expr expr = Factor();
+        var expr = Factor();
         while (Match(MINUS, PLUS))
         {
-            Token @operator = Previous();
-            Expr right = Factor();
+            var @operator = Previous();
+            var right = Factor();
             expr = new Expr.Binary(expr, @operator, right);
         }
 
@@ -277,11 +276,11 @@ public class Parser
 
     private Expr Factor()
     {
-        Expr expr = Unary();
+        var expr = Unary();
         while (Match(SLASH, STAR))
         {
-            Token @operator = Previous();
-            Expr right = Unary();
+            var @operator = Previous();
+            var right = Unary();
             expr = new Expr.Binary(expr, @operator, right);
         }
 
@@ -292,8 +291,8 @@ public class Parser
     {
         if (Match(BANG, MINUS))
         {
-            Token @operator = Previous();
-            Expr right = Unary();
+            var @operator = Previous();
+            var right = Unary();
             return new Expr.Unary(@operator, right);
         }
 
@@ -312,7 +311,7 @@ public class Parser
 
         if (Match(LEFT_PAREN))
         {
-            Expr expr = Expression();
+            var expr = Expression();
             Consume(RIGHT_PAREN, "Expect ')' after expression");
             return new Expr.Grouping(expr);
         }

@@ -61,7 +61,7 @@ public class Scanner
 
     private void ScanToken()
     {
-        char c = Advance();
+        var c = Advance();
         switch (c)
         {
       //@formatter:off
