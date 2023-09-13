@@ -193,6 +193,16 @@ public class Interpreter : BaseVisitor<object, object?>
         return IsTruthy(condition) ? Evaluate(expr.Left) : Evaluate(expr.Right);
     }
 
+    public override object? VisitWhileStmt(Stmt.While stmt)
+    {
+        while (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.Body);
+        }
+
+        return null;
+    }
+
     public override object? VisitLogicalExpr(Expr.Logical expr)
     {
         object? left = Evaluate(expr.Left);

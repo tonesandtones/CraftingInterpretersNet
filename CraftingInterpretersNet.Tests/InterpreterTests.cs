@@ -105,6 +105,31 @@ public class InterpreterTests
             "truthy");
         yield return TestCase("""print "hi" or 2;""", "hi");
         yield return TestCase("""print nil or "yes";""", "yes");
+        yield return TestCase(
+            """
+            var a = 0;
+            while (a <= 2) print a = a + 1;
+            """,
+            "1", "2", "3");
+        yield return TestCase(
+            """
+            for (var i = 0; i < 5; i=i+1) {
+              print i;
+            }
+            """,
+            "0", "1", "2", "3", "4");
+        yield return TestCase( // Fibonacci !!!
+            """
+            var a = 0;
+            var temp;
+            for (var b = 1; a < 10000; b = temp + b) {
+              print a;
+              temp = a;
+              a = b;
+            }
+            """,
+            "0", "1", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "144", "233", "377", "610", "987", "1597",
+            "2584", "4181", "6765");
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]
@@ -122,8 +147,10 @@ public class InterpreterTests
 
     public static IEnumerable<object[]> RuntimeErrorTestData()
     {
-        yield return TestCase("\"a\" + 1;", "Both operands must be the same type and both strings or numbers. Left is String, right is Double");
-        yield return TestCase("\"a\" + nil;", "Both operands must be the same type and both strings or numbers. Left is String, right is nil");
+        yield return TestCase("\"a\" + 1;",
+            "Both operands must be the same type and both strings or numbers. Left is String, right is Double");
+        yield return TestCase("\"a\" + nil;",
+            "Both operands must be the same type and both strings or numbers. Left is String, right is nil");
         yield return TestCase("nil * 1;", "Operands must be numbers.");
         yield return TestCase("-nil;", "Operand must be a number.");
         yield return TestCase("xyz = 1;", "Undefined variable 'xyz'.");
@@ -136,7 +163,7 @@ public class InterpreterTests
         Parser p = new(tokens, _errorReporter);
         var parsedExpr = p.Parse().ToList();
 
-        if (parsedExpr is { Count: 0 })
+        if (parsedExpr is { Count: 0 } || _errorReporter.HasReceivedError)
         {
             _outputHelper.WriteLine("Did not receive output from Parser.");
             if (!_errorReporter.HasReceivedError)
@@ -148,12 +175,13 @@ public class InterpreterTests
                 _outputHelper.WriteLine("Error reporter had these errors:");
                 foreach (var errorEvent in _errorReporter.ReceivedErrors)
                 {
-                    _outputHelper.WriteLine($"{errorEvent.Message} : {errorEvent.Where}");
+                    _outputHelper.WriteLine($"{errorEvent.Message} : {errorEvent.Where} : line {errorEvent.Line}");
                 }
             }
+
             Assert.Fail("Did not receive any output from Parser");
         }
-        
+
         Interpreter i = new(_runtimeReporter, _sink);
         i.Interpret(parsedExpr);
     }
