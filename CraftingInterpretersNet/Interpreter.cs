@@ -9,6 +9,7 @@ public class Interpreter : BaseVisitor<object, object?>
 {
     private readonly IRuntimeErrorReporter _errorReporter;
     private readonly IOutputSink _sink;
+    private readonly Environment _environment = new();
 
     public Interpreter(): this(Defaults.DefaultRuntimeErrorReporter, Defaults.DefaultOutputSink)
     {
@@ -40,6 +41,30 @@ public class Interpreter : BaseVisitor<object, object?>
         stmt.Accept(this);
     }
 
+    public override object? VisitVarStmt(Stmt.Var stmt)
+    {
+        object? value = null;
+        if (stmt.Initializer != null)
+        {
+            value = Evaluate(stmt.Initializer);
+        }
+        
+        _environment.Define(stmt.Name.Lexeme, value);
+        return null;
+    }
+
+    public override object? VisitVariableExpr(Expr.Variable expr)
+    {
+        return _environment.Get(expr.Name);
+    }
+
+    public override object? VisitAssignExpr(Expr.Assign expr)
+    {
+        object? value = Evaluate(expr.Value);
+        _environment.Assign(expr.Name, value);
+        return value;
+    }
+
     public override object? VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt.Expr);
@@ -48,29 +73,30 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitPrintStmt(Stmt.Print stmt)
     {
-        object value = Evaluate(stmt.Expr);
+        object? value = Evaluate(stmt.Expr);
         _sink.Print(Stringify(value));
         return null;
     }
 
-    public override object VisitLiteralExpr(Expr.Literal expr)
+    public override object? VisitLiteralExpr(Expr.Literal expr)
     {
         return expr.Value;
     }
 
-    public override object VisitGroupingExpr(Expr.Grouping expr)
+    public override object? VisitGroupingExpr(Expr.Grouping expr)
     {
         return Evaluate(expr.Expression);
     }
 
-    public override object VisitUnaryExpr(Expr.Unary expr)
+    public override object? VisitUnaryExpr(Expr.Unary expr)
     {
-        object right = Evaluate(expr.Right);
+        object? right = Evaluate(expr.Right);
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (expr.Oper.Type)
         {
             case MINUS:
                 CheckNumberOperand(expr.Oper, right);
-                return -(double)right;
+                return -(double)right!;
             case BANG:
                 return !IsTruthy(right);
         }
@@ -80,22 +106,22 @@ public class Interpreter : BaseVisitor<object, object?>
     }
 
 
-    public override object VisitBinaryExpr(Expr.Binary expr)
+    public override object? VisitBinaryExpr(Expr.Binary expr)
     {
-        object left = Evaluate(expr.Left);
-        object right = Evaluate(expr.Right);
+        object? left = Evaluate(expr.Left);
+        object? right = Evaluate(expr.Right);
 
         switch (expr.Oper.Type)
         {
             case MINUS:
                 CheckNumberOperands(expr.Oper, left, right);
-                return (double)left - (double)right;
+                return (double)left! - (double)right!;
             case SLASH:
                 CheckNumberOperands(expr.Oper, left, right);
-                return (double)left / (double)right;
+                return (double)left! / (double)right!;
             case STAR:
                 CheckNumberOperands(expr.Oper, left, right);
-                return (double)left * (double)right;
+                return (double)left! * (double)right!;
             case PLUS:
                 CheckAdditionOperands(expr.Oper, left, right);
                 if (left is double ld && right is double rd) return ld + rd;
@@ -103,16 +129,16 @@ public class Interpreter : BaseVisitor<object, object?>
                 break;
             case GREATER:
                 CheckNumberOperands(expr.Oper, left, right);
-                return (double)left > (double)right;
+                return (double)left! > (double)right!;
             case GREATER_EQUAL:
                 CheckNumberOperands(expr.Oper, left, right);
-                return (double)left >= (double)right;
+                return (double)left! >= (double)right!;
             case LESS:
                 CheckNumberOperands(expr.Oper, left, right);
-                return (double)left < (double)right;
+                return (double)left! < (double)right!;
             case LESS_EQUAL:
                 CheckNumberOperands(expr.Oper, left, right);
-                return (double)left <= (double)right;
+                return (double)left! <= (double)right!;
             case BANG_EQUAL:
                 return !IsEqual(left, right);
             case EQUAL_EQUAL:
@@ -123,14 +149,14 @@ public class Interpreter : BaseVisitor<object, object?>
         return null;
     }
 
-    public override object VisitConditionalExpr(Expr.Conditional expr)
+    public override object? VisitConditionalExpr(Expr.Conditional expr)
     {
-        object condition = Evaluate(expr.Condition);
+        object? condition = Evaluate(expr.Condition);
 
         return IsTruthy(condition) ? Evaluate(expr.Left) : Evaluate(expr.Right);
     }
 
-    private object Evaluate(Expr expr)
+    private object? Evaluate(Expr expr)
     {
         return expr.Accept(this);
     }
@@ -152,13 +178,13 @@ public class Interpreter : BaseVisitor<object, object?>
         return left.Equals(right);
     }
 
-    private void CheckNumberOperand(Token @operator, object operand)
+    private void CheckNumberOperand(Token @operator, object? operand)
     {
         if (operand is double) return;
         throw new RuntimeError(@operator, "Operand must be a number.");
     }
 
-    private void CheckNumberOperands(Token @operator, object left, object right)
+    private void CheckNumberOperands(Token @operator, object? left, object? right)
     {
         if (left is double && right is double) return;
         throw new RuntimeError(@operator, "Operands must be numbers.");

@@ -58,7 +58,7 @@ public class Parser
         var name = Consume(IDENTIFIER, "Expect variable name.");
 
         Expr? initialiser = null;
-        if (Match(EQUAL_EQUAL))
+        if (Match(EQUAL))
         {
             initialiser = Expression();
         }
@@ -90,9 +90,26 @@ public class Parser
 
     private Expr Expression()
     {
-        return
-            Ternary(); //Implemented as part of ch6 challenges https://craftinginterpreters.com/parsing-expressions.html#challenges
-        // return Equality(); //replace Ternary() with Expression() to go back to what the book does.
+        return Assignment();
+    }
+
+    private Expr Assignment()
+    {
+        Expr expr = Ternary();
+        if (Match(EQUAL))
+        {
+            Token equals = Previous();
+            Expr value = Assignment();
+            if (expr is Expr.Variable ev)
+            {
+                Token name = ev.Name;
+                return new Expr.Assign(name, value);
+            }
+
+            Error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     //ternary        → equality ( "?" expression ":" expression)* ;

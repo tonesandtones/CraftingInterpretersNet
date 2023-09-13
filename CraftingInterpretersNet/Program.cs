@@ -15,7 +15,7 @@ internal class Program
         if (args.Length > 1)
         {
             Console.WriteLine("Usage loxnet [script_file]");
-            Environment.Exit(64);
+            System.Environment.Exit(64);
         }
 
         if (args.Length == 1)
@@ -29,8 +29,8 @@ internal class Program
         var contents = File.ReadAllText(path);
         Run(contents);
 
-        if (HadParseError) Environment.Exit(65);
-        if (HadRuntimeError) Environment.Exit(70);
+        if (HadParseError) System.Environment.Exit(65);
+        if (HadRuntimeError) System.Environment.Exit(70);
     }
 
     private static void RunPrompt()
