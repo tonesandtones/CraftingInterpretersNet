@@ -9,7 +9,8 @@ public class Interpreter : BaseVisitor<object, object?>
 {
     private readonly IRuntimeErrorReporter _errorReporter;
     private readonly IOutputSink _sink;
-    private Environment _environment = new();
+    internal readonly Environment Globals = new();
+    private Environment _environment;
 
     public Interpreter() : this(Defaults.DefaultRuntimeErrorReporter, Defaults.DefaultOutputSink)
     {
@@ -19,6 +20,9 @@ public class Interpreter : BaseVisitor<object, object?>
     {
         _errorReporter = errorReporter;
         _sink = sink;
+        _environment = Globals;
+        
+        Globals.Define("clock", new ClockCallable());
     }
 
     public void Interpret(IEnumerable<Stmt?> statements)
@@ -47,7 +51,7 @@ public class Interpreter : BaseVisitor<object, object?>
         return null;
     }
 
-    private void ExecuteBlock(List<Stmt> statements, Environment environment)
+    internal void ExecuteBlock(List<Stmt> statements, Environment environment) 
     {
         var previous = _environment;
         try
@@ -100,6 +104,35 @@ public class Interpreter : BaseVisitor<object, object?>
         var value = Evaluate(expr.Value);
         _environment.Assign(expr.Name, value);
         return value;
+    }
+
+    public override object? VisitCallExpr(Expr.Call expr)
+    {
+        var callee = Evaluate(expr.Callee);
+        List<object> arguments = new();
+        foreach (var argument in expr.Arguments)
+        {
+            arguments.Add(Evaluate(argument)!);
+        }
+
+        if (callee is not ILoxCallable lc)
+        {
+            throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
+        }
+
+        if (arguments.Count != lc.Arity)
+        {
+            throw new RuntimeError(expr.Paren, $"Expected {lc.Arity} arguments but got {arguments.Count}.");
+        }
+        
+        return lc.Call(this, arguments);
+    }
+
+    public override object? VisitFunctionStmt(Stmt.Function stmt)
+    {
+        LoxFunction function = new(stmt);
+        _environment.Define(stmt.Name.Lexeme, function);
+        return null;
     }
 
     public override object? VisitExpressionStmt(Stmt.Expression stmt)

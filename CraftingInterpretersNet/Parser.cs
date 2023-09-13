@@ -31,7 +31,7 @@ public class Parser
                 statements.Add(Declaration());
             }
         }
-        catch (ParseErrorException)
+        catch (ParseError)
         {
             return Array.Empty<Stmt>();
         }
@@ -43,13 +43,36 @@ public class Parser
     {
         try
         {
-            return Match(VAR) ? VarDeclaration() : Statement();
+            if (Match(FUN)) return Function("function");
+            if (Match(VAR)) return VarDeclaration();
+            return Statement();
         }
-        catch (ParseErrorException)
+        catch (ParseError)
         {
             Synchronise();
             return null;
         }
+    }
+
+    private Stmt.Function Function(string kind)
+    {
+        var name = Consume(IDENTIFIER, $"Expect {kind} name.");
+        Consume(LEFT_PAREN, $"Expect '(' after {kind} name.");
+        List<Token> parameters = new();
+        if (!Check(RIGHT_PAREN))
+        {
+            do
+            {
+                if (parameters.Count >= 255) Error(Peek(), "Can't have more than 255 parameters.");
+                parameters.Add(Consume(IDENTIFIER, "Expect parameter name."));
+            } while (Match(COMMA));
+        }
+
+        Consume(RIGHT_PAREN, "Expect ')' after parameters.");
+        Consume(LEFT_BRACE, $"Expect '{{' before {kind} body.");
+        var body = Block();
+        return new Stmt.Function(name, parameters, body);
+
     }
 
     private Stmt VarDeclaration()
@@ -85,7 +108,7 @@ public class Parser
         //    print i; //body
         //    i = i + 1; //increment
         //  }
-        
+
         Consume(LEFT_PAREN, "Expect '(' after 'for'.");
         Stmt? initialiser;
         if (Match(SEMICOLON)) initialiser = null;
@@ -112,7 +135,7 @@ public class Parser
         body = new Stmt.While(condition, body);
 
         if (initialiser != null) body = new Stmt.Block(new List<Stmt> { initialiser, body });
-        
+
         return body;
     }
 
@@ -296,7 +319,42 @@ public class Parser
             return new Expr.Unary(@operator, right);
         }
 
-        return Primary();
+        return Call();
+    }
+
+    private Expr Call()
+    {
+        var expr = Primary();
+        while (true)
+        {
+            if (Match(LEFT_PAREN))
+            {
+                expr = FinishCall(expr);
+            }
+            else break;
+        }
+
+        return expr;
+    }
+
+    private Expr FinishCall(Expr callee)
+    {
+        List<Expr> arguments = new();
+        if (!Check(RIGHT_PAREN))
+        {
+            do
+            {
+                if (arguments.Count >= 255)
+                {
+                    Error(Peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.Add(Expression());
+            }
+            while (Match(COMMA));
+        }
+
+        var paren = Consume(RIGHT_PAREN, "Expect ')' after arguments.");
+        return new Expr.Call(callee, paren, arguments);
     }
 
     private Expr Primary()
@@ -351,10 +409,10 @@ public class Parser
         }
     }
 
-    private ParseErrorException Error(Token token, string message)
+    private ParseError Error(Token token, string message)
     {
         _errorReporter.Error(token, message);
-        return new ParseErrorException();
+        return new ParseError();
     }
 
     private bool Match(params TokenType[] types)
@@ -398,7 +456,7 @@ public class Parser
         return _tokens[_current - 1];
     }
 
-    public class ParseErrorException : Exception
+    public class ParseError : Exception
     {
     }
 }

@@ -130,6 +130,20 @@ public class InterpreterTests
             """,
             "0", "1", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "144", "233", "377", "610", "987", "1597",
             "2584", "4181", "6765");
+        yield return TestCase("print clock;", "<native fn>");
+        yield return TestCase("fun a(){ print \"a\"; }\nprint a;", "<fn a>");
+        yield return TestCase("fun a(){ print \"abc\"; } print a();", "abc");
+    }
+
+    [Fact]
+    public void ClockReturnsCurrentTime()
+    {
+        Interpret("print clock();");
+        _sink.Messages.Should().HaveCount(1);
+        var actualTimeStr = _sink.Messages.Single();
+        long.TryParse(actualTimeStr, out var actualTime).Should().BeTrue();
+        actualTime.Should().BeCloseTo(DateTimeOffset.Now.ToUnixTimeMilliseconds(), 50);
+
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]
