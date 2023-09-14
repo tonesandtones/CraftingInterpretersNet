@@ -132,7 +132,23 @@ public class InterpreterTests
             "2584", "4181", "6765");
         yield return TestCase("print clock;", "<native fn>");
         yield return TestCase("fun a(){ print \"a\"; }\nprint a;", "<fn a>");
-        yield return TestCase("fun a(){ print \"abc\"; } print a();", "abc");
+        yield return TestCase("fun a(){ print \"abc\"; } a();", "abc");
+        yield return TestCase("""fun HelloWorld(Name) { print "Hello " + Name + "!"; } HelloWorld("Tones"); """,
+            "Hello Tones!");
+        yield return TestCase("""fun a(){ return "abc"; } print a();""", "abc");
+        yield return TestCase( // Recursive fibonacci !! // slow...🐌
+            """
+            fun fib(n) {
+              if (n <= 1) return n;
+              return fib(n - 2) + fib(n - 1);
+            }
+
+            for (var i = 0; i < 20; i = i + 1) {
+              print fib(i);
+            }
+            """,
+            "0", "1", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "144", "233", "377", "610", "987", "1597",
+            "2584", "4181");
     }
 
     [Fact]
@@ -143,7 +159,6 @@ public class InterpreterTests
         var actualTimeStr = _sink.Messages.Single();
         long.TryParse(actualTimeStr, out var actualTime).Should().BeTrue();
         actualTime.Should().BeCloseTo(DateTimeOffset.Now.ToUnixTimeMilliseconds(), 50);
-
     }
 
     [MemberData(nameof(RuntimeErrorTestData))]
@@ -196,7 +211,7 @@ public class InterpreterTests
             Assert.Fail("Did not receive any output from Parser");
         }
 
-        Interpreter i = new(_runtimeReporter, _sink);
+        Interpreter i = new(_runtimeReporter, new MultiSink(_sink, new TestOutputHelperSink(_outputHelper)));
         i.Interpret(parsedExpr);
     }
 

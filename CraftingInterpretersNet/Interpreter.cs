@@ -148,6 +148,14 @@ public class Interpreter : BaseVisitor<object, object?>
         return null;
     }
 
+    public override object VisitReturnStmt(Stmt.Return stmt)
+    {
+        object? value = null;
+        if (stmt.Value != null) value = Evaluate(stmt.Value);
+        
+        throw new Return(value);
+    }
+
     public override object? VisitLiteralExpr(Expr.Literal expr)
     {
         return expr.Value;

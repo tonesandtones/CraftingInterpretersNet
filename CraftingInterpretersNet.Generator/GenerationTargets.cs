@@ -46,7 +46,7 @@ public static class GenerationTargets
             TargetOf("Function", ArgOf("Token", "name"), ArgOf("List<Token>", "par"), ArgOf("List<Stmt>", "body")),
             TargetOf("If", ArgOf("Expr", "condition"), ArgOf("Stmt", "thenBranch"), ArgOf("Stmt?", "elseBranch")),
             TargetOf("Print", ArgOf("Expr", "expr")),
-            TargetOf("Return", ArgOf("Token", "keyword"), ArgOf("Expr", "value")),
+            TargetOf("Return", ArgOf("Token", "keyword"), ArgOf("Expr?", "value")),
             TargetOf("Var", ArgOf("Token", "name"), ArgOf("Expr?", "initializer")),
             TargetOf("While", ArgOf("Expr", "condition"), ArgOf("Stmt", "body"))
         )
