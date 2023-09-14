@@ -9,8 +9,9 @@ public class Interpreter : BaseVisitor<object, object?>
 {
     private readonly IRuntimeErrorReporter _errorReporter;
     private readonly IOutputSink _sink;
-    internal readonly Environment Globals = new();
+    private readonly Environment _globals = new();
     private Environment _environment;
+    private readonly Dictionary<Expr, int> _locals = new();
 
     public Interpreter() : this(Defaults.DefaultRuntimeErrorReporter, Defaults.DefaultOutputSink)
     {
@@ -20,9 +21,9 @@ public class Interpreter : BaseVisitor<object, object?>
     {
         _errorReporter = errorReporter;
         _sink = sink;
-        _environment = Globals;
+        _environment = _globals;
         
-        Globals.Define("clock", new ClockCallable());
+        _globals.Define("clock", new ClockCallable());
     }
 
     public void Interpret(IEnumerable<Stmt?> statements)
@@ -43,6 +44,11 @@ public class Interpreter : BaseVisitor<object, object?>
     private void Execute(Stmt stmt)
     {
         stmt.Accept(this);
+    }
+
+    internal void Resolve(Expr expr, int depth)
+    {
+        _locals[expr] = depth;
     }
 
     public override object? VisitBlockStmt(Stmt.Block stmt)
@@ -96,13 +102,31 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitVariableExpr(Expr.Variable expr)
     {
-        return _environment.Get(expr.Name);
+        return LookupVariable(expr.Name, expr);
+    }
+
+    private object? LookupVariable(Token name, Expr expr)
+    {
+        if (_locals.TryGetValue(expr, out var distance))
+        {
+            return _environment.GetAt(distance, name.Lexeme);
+        }
+
+        return _globals.Get(name);
     }
 
     public override object? VisitAssignExpr(Expr.Assign expr)
     {
         var value = Evaluate(expr.Value);
-        _environment.Assign(expr.Name, value);
+        if (_locals.TryGetValue(expr, out var distance))
+        {
+            _environment.AssignAt(distance, expr.Name, value);
+        }
+        else
+        {
+            _globals.Assign(expr.Name, value);
+        }
+        
         return value;
     }
 

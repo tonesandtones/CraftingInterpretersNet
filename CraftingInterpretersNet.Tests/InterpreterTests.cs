@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using CraftingInterpretersNet.Abstractions;
+using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -87,17 +88,6 @@ public class InterpreterTests
         yield return TestCase(
             """
             var a = 1;
-            {
-              print 1;
-              var a = a + 2;
-              print a;
-            }
-            print a;
-            """,
-            "1", "3", "1");
-        yield return TestCase(
-            """
-            var a = 1;
             var b;
             if (a == 1) { b = "truthy"; } else { b = "falsey"; }
             print b;
@@ -166,6 +156,20 @@ public class InterpreterTests
             counter(); // "2".
             """,
             "1", "2");
+        yield return TestCase( //showA() should resolve the same value of a each time it's run, even though a is redefined between runs.
+            """
+            var a = "global";
+            {
+              fun showA() {
+                print a;
+              }
+            
+              showA();
+              var a = "block";
+              showA();
+            }
+            """,
+            "global", "global");
     }
 
     [Fact]
@@ -209,9 +213,21 @@ public class InterpreterTests
         Parser p = new(tokens, _errorReporter);
         var parsedExpr = p.Parse().ToList();
 
+        FailIfErrors(parsedExpr, "parse");
+        
+        Interpreter i = new(_runtimeReporter, new MultiSink(_sink, new TestOutputHelperSink(_outputHelper)));
+        Resolver resolver = new(i, _errorReporter);
+        resolver.Resolve(parsedExpr);
+        FailIfErrors(parsedExpr, "resolve");
+        
+        i.Interpret(parsedExpr);
+    }
+
+    private void FailIfErrors(List<Stmt> parsedExpr, string stage)
+    {
         if (parsedExpr is { Count: 0 } || _errorReporter.HasReceivedError)
         {
-            _outputHelper.WriteLine("Did not receive output from Parser.");
+            _outputHelper.WriteLine($"Did not receive output from {stage}.");
             if (!_errorReporter.HasReceivedError)
             {
                 _outputHelper.WriteLine("Error reporter did not receive any errors.");
@@ -225,11 +241,8 @@ public class InterpreterTests
                 }
             }
 
-            Assert.Fail("Did not receive any output from Parser");
+            Assert.Fail($"Did not receive any output from {stage}");
         }
-
-        Interpreter i = new(_runtimeReporter, new MultiSink(_sink, new TestOutputHelperSink(_outputHelper)));
-        i.Interpret(parsedExpr);
     }
 
     private void PrintInterpretErrors()

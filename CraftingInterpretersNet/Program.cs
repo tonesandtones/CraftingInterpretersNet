@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using CraftingInterpretersNet.Abstractions;
+using System.Linq;
 
 namespace CraftingInterpretersNet;
 
@@ -52,10 +51,14 @@ internal class Program
         Scanner scanner = new(source);
         var tokens = scanner.ScanTokens();
         Parser parser = new(tokens);
-        var statements = parser.Parse();
-        Interpreter interpreter = new();
-        
+        var statements = parser.Parse().ToList();
         if (HadParseError) return;
+        
+        Interpreter interpreter = new();
+        Resolver resolver = new(interpreter);
+        resolver.Resolve(statements);
+        if (HadParseError) return;
+
         // Console.WriteLine(new AstPrinter().Print(expression));
         interpreter.Interpret(statements);
     }
