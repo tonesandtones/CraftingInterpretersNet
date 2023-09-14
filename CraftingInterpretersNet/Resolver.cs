@@ -8,7 +8,8 @@ public class Resolver : BaseVisitor<object, object>
     private enum FunctionType
     {
         NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD
     }
     
     private readonly IErrorReporter _errorReporter;
@@ -25,6 +26,33 @@ public class Resolver : BaseVisitor<object, object>
     {
         _interpreter = interpreter;
         _errorReporter = errorReporter;
+    }
+
+    public override object? VisitClassStmt(Stmt.Class stmt)
+    {
+        Declare(stmt.Name);
+        Define(stmt.Name);
+
+        foreach (var method in stmt.Methods)
+        {
+            var declaration = FunctionType.METHOD;
+            ResolveFunction(method, declaration);
+        }
+        
+        return null;
+    }
+
+    public override object? VisitGetExpr(Expr.Get expr)
+    {
+        Resolve(expr.Obj); 
+        return null;
+    }
+
+    public override object? VisitSetExpr(Expr.Set expr)
+    {
+        Resolve(expr.Value);
+        Resolve(expr.Obj);
+        return null;
     }
 
     public override object? VisitBlockStmt(Stmt.Block stmt)

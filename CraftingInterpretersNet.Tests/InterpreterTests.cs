@@ -171,6 +171,8 @@ public class InterpreterTests
             }
             """,
             "global", "global");
+        yield return TestCase("""class Bacon{eat(){print "om nom nom";}} Bacon().eat();""", "om nom nom");
+        yield return TestCase("""class Bacon{eat(){print "om nom nom";}} print Bacon().eat;""", "<fn eat>");
     }
 
     [Fact]

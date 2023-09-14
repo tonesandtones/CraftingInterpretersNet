@@ -43,6 +43,7 @@ public class Parser
     {
         try
         {
+            if (Match(CLASS)) return ClassDeclaration();
             if (Match(FUN)) return Function("function");
             if (Match(VAR)) return VarDeclaration();
             return Statement();
@@ -52,6 +53,22 @@ public class Parser
             Synchronise();
             return null;
         }
+    }
+
+    private Stmt ClassDeclaration()
+    {
+        var name = Consume(IDENTIFIER, "Expect class name.");
+        Consume(LEFT_BRACE, "Expect '{' before class body.");
+
+        List<Stmt.Function> methods = new();
+        while (!Check(RIGHT_BRACE) && !IsAtEnd())
+        {
+            methods.Add(Function("method"));
+        }
+
+        Consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Stmt.Class(name, null, methods);
     }
 
     private Stmt.Function Function(string kind)
@@ -217,12 +234,8 @@ public class Parser
         {
             var equals = Previous();
             var value = Assignment();
-            if (expr is Expr.Variable ev)
-            {
-                var name = ev.Name;
-                return new Expr.Assign(name, value);
-            }
-
+            if (expr is Expr.Variable ev) return new Expr.Assign(ev.Name, value);
+            if (expr is Expr.Get get) return new Expr.Set(get.Obj, get.Name, value);
             Error(equals, "Invalid assignment target.");
         }
 
@@ -344,6 +357,10 @@ public class Parser
             if (Match(LEFT_PAREN))
             {
                 expr = FinishCall(expr);
+            } else if (Match(DOT))
+            {
+                var name = Consume(IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
             }
             else break;
         }

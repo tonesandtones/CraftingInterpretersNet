@@ -51,6 +51,42 @@ public class Interpreter : BaseVisitor<object, object?>
         _locals[expr] = depth;
     }
 
+    public override object? VisitClassStmt(Stmt.Class stmt)
+    {
+        _environment.Define(stmt.Name.Lexeme, null);
+
+        Dictionary<string, LoxFunction> methods = new();
+        foreach (var method in stmt.Methods)
+        {
+            LoxFunction function = new(method, _environment);
+            methods[method.Name.Lexeme] = function;
+        }
+        
+        LoxClass klass = new LoxClass(stmt.Name.Lexeme, methods);
+        _environment.Assign(stmt.Name, klass);
+        return null;
+    }
+
+    public override object? VisitGetExpr(Expr.Get expr)
+    {
+        var obj = Evaluate(expr.Obj);
+        if (obj is LoxInstance instance)
+        {
+            return instance.Get(expr.Name);
+        }
+
+        throw new RuntimeError(expr.Name, "Only instances can have properties.");
+    }
+
+    public override object? VisitSetExpr(Expr.Set expr)
+    {
+        var obj = Evaluate(expr.Obj);
+        if (obj is not LoxInstance instance) throw new RuntimeError(expr.Name, "Only instances have fields");
+        var value = Evaluate(expr.Value);
+        instance.Set(expr.Name, value);
+        return value;
+    }
+
     public override object? VisitBlockStmt(Stmt.Block stmt)
     {
         ExecuteBlock(stmt.Statements, new Environment(_environment));
