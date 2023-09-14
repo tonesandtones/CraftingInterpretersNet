@@ -43,6 +43,16 @@ public class ResolutionErrorTests
             print a;
             """,
             "Can't read local variable in its own initialiser.");
+        yield return TestCase(
+            """
+            fun bad() {
+              var a = "first";
+              var a = "second";
+            }
+            """,
+            "Already a variable with this name in this scope."
+        );
+        yield return TestCase("return \"top level return\";", "Can't return from top-level code.");
     }
 
 

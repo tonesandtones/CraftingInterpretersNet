@@ -5,10 +5,17 @@ namespace CraftingInterpretersNet;
 
 public class Resolver : BaseVisitor<object, object>
 {
+    private enum FunctionType
+    {
+        NONE,
+        FUNCTION
+    }
+    
     private readonly IErrorReporter _errorReporter;
     private readonly Interpreter _interpreter;
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
 
+    private FunctionType _currentFunction = FunctionType.NONE;
 
     public Resolver(Interpreter interpreter) : this(interpreter, Defaults.DefaultErrorReporter)
     {
@@ -33,7 +40,7 @@ public class Resolver : BaseVisitor<object, object>
         Declare(stmt.Name);
         Define(stmt.Name);
 
-        ResolveFunction(stmt);
+        ResolveFunction(stmt, FunctionType.FUNCTION);
         return null;
     }
 
@@ -144,6 +151,10 @@ public class Resolver : BaseVisitor<object, object>
 
     public override object? VisitReturnStmt(Stmt.Return stmt)
     {
+        if (_currentFunction == FunctionType.NONE)
+        {
+            _errorReporter.Error(stmt.Keyword, "Can't return from top-level code.");
+        }
         if (stmt.Value != null) Resolve(stmt.Value);
         return null;
     }
@@ -159,7 +170,13 @@ public class Resolver : BaseVisitor<object, object>
     {
         if (_scopes.Count == 0) return;
 
-        _scopes.Peek()[name.Lexeme] = false;
+        var scope = _scopes.Peek();
+        if (scope.ContainsKey(name.Lexeme))
+        {
+            _errorReporter.Error(name, "Already a variable with this name in this scope.");
+        }
+
+        scope[name.Lexeme] = false;
     }
 
     private void Define(Token name)
@@ -201,8 +218,11 @@ public class Resolver : BaseVisitor<object, object>
         expr.Accept(this);
     }
 
-    private void ResolveFunction(Stmt.Function function)
+    private void ResolveFunction(Stmt.Function function, FunctionType type)
     {
+        var enclosingFunctionType = _currentFunction;
+        _currentFunction = type;
+        
         BeginScope();
         foreach (var param in function.Par)
         {
@@ -212,6 +232,8 @@ public class Resolver : BaseVisitor<object, object>
 
         Resolve(function.Body);
         EndScope();
+        
+        _currentFunction = enclosingFunctionType;
     }
 
     private void BeginScope()

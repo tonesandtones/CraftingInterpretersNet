@@ -150,13 +150,14 @@ public class InterpreterTests
             
               return count;
             }
-            
+
             var counter = makeCounter();
             counter(); // "1".
             counter(); // "2".
             """,
             "1", "2");
-        yield return TestCase( //showA() should resolve the same value of a each time it's run, even though a is redefined between runs.
+        yield return TestCase(
+            //showA() should resolve the same value of a each time it's run, even though a is redefined between runs.
             """
             var a = "global";
             {
@@ -214,12 +215,12 @@ public class InterpreterTests
         var parsedExpr = p.Parse().ToList();
 
         FailIfErrors(parsedExpr, "parse");
-        
+
         Interpreter i = new(_runtimeReporter, new MultiSink(_sink, new TestOutputHelperSink(_outputHelper)));
         Resolver resolver = new(i, _errorReporter);
         resolver.Resolve(parsedExpr);
         FailIfErrors(parsedExpr, "resolve");
-        
+
         i.Interpret(parsedExpr);
     }
 
