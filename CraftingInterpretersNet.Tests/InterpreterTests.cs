@@ -149,6 +149,23 @@ public class InterpreterTests
             """,
             "0", "1", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "144", "233", "377", "610", "987", "1597",
             "2584", "4181");
+        yield return TestCase( //nested functions and scopes
+            """
+            fun makeCounter() {
+              var i = 0;
+              fun count() {
+                i = i + 1;
+                print i;
+              }
+            
+              return count;
+            }
+            
+            var counter = makeCounter();
+            counter(); // "1".
+            counter(); // "2".
+            """,
+            "1", "2");
     }
 
     [Fact]

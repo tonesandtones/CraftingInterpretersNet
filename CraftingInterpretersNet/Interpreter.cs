@@ -130,7 +130,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitFunctionStmt(Stmt.Function stmt)
     {
-        LoxFunction function = new(stmt);
+        LoxFunction function = new(stmt, _environment);
         _environment.Define(stmt.Name.Lexeme, function);
         return null;
     }

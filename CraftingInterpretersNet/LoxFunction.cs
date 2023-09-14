@@ -6,15 +6,17 @@ namespace CraftingInterpretersNet;
 public class LoxFunction : ILoxCallable
 {
     private readonly Stmt.Function _declaration;
+    private readonly Environment _closure;
 
-    public LoxFunction(Stmt.Function declaration)
+    public LoxFunction(Stmt.Function declaration, Environment closure)
     {
         _declaration = declaration;
+        _closure = closure;
     }
 
     public object? Call(Interpreter interpreter, List<object> arguments)
     {
-        Environment environment = new Environment(interpreter.Globals);
+        Environment environment = new(_closure);
         for (var i = 0; i < _declaration.Par.Count; i++)
         {
             var param = _declaration.Par[i];
