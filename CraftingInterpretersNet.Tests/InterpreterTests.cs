@@ -188,6 +188,32 @@ public class InterpreterTests
             a.SayIt();
             """,
             "Hello, I Am Tones");
+        yield return TestCase(
+            """
+            class Foo {
+              init() {
+                print this;
+              }
+            }
+
+            var foo = Foo();
+            print foo.init();
+            """,
+            "Foo instance",  //when foo is constructed and init() is called by the interpreter
+            "Foo instance",  //when foo.init() is called on the last line (and returns the foo.this)
+            "Foo instance"); //when we print the result of foo.init()
+        yield return TestCase(
+            """
+            class Foo {
+              init() {
+                print "a";
+                return;    //early return ...
+                print "b"; //... should not print "b"
+              }
+            }
+            Foo();
+            """,
+            "a");
     }
 
     [Fact]

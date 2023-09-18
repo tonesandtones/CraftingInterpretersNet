@@ -59,7 +59,7 @@ public class Interpreter : BaseVisitor<object, object?>
         Dictionary<string, LoxFunction> methods = new();
         foreach (var method in stmt.Methods)
         {
-            LoxFunction function = new(method, _environment);
+            LoxFunction function = new(method, _environment, method.Name.Lexeme.Equals("init"));
             methods[method.Name.Lexeme] = function;
         }
         
@@ -196,7 +196,7 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitFunctionStmt(Stmt.Function stmt)
     {
-        LoxFunction function = new(stmt, _environment);
+        LoxFunction function = new(stmt, _environment, false);
         _environment.Define(stmt.Name.Lexeme, function);
         return null;
     }

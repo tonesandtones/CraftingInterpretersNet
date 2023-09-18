@@ -25,4 +25,4 @@ A Lox implementation in C# written while following along to https://craftinginte
 ## Where I'm up to (what's next to work on)
 
 * `jlox` implementation is mostly done, just a little bit left to do to wrap up jlox (but in C# obviously 😁)
-* https://craftinginterpreters.com/classes.html#invoking-init-directly
+* Last chapter (of the jlox implementation)! https://craftinginterpreters.com/inheritance.html

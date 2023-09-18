@@ -7,11 +7,13 @@ public class LoxFunction : ILoxCallable
 {
     private readonly Stmt.Function _declaration;
     private readonly Environment _closure;
+    private readonly bool _isInitialiser;
 
-    public LoxFunction(Stmt.Function declaration, Environment closure)
+    public LoxFunction(Stmt.Function declaration, Environment closure, bool isInitialiser)
     {
         _declaration = declaration;
         _closure = closure;
+        _isInitialiser = isInitialiser;
     }
 
     public object? Call(Interpreter interpreter, List<object> arguments)
@@ -29,9 +31,10 @@ public class LoxFunction : ILoxCallable
         }
         catch (Return returnValue)
         {
-            return returnValue.Value;
+            return _isInitialiser ? _closure.GetAt(0, "this") : returnValue.Value;
         }
-        return null;
+
+        return _isInitialiser ? _closure.GetAt(0, "this") : null;
     }
 
     public int Arity => _declaration.Par.Count;
@@ -40,7 +43,7 @@ public class LoxFunction : ILoxCallable
     {
         Environment environment = new(_closure);
         environment.Define("this", instance);
-        return new LoxFunction(_declaration, environment);
+        return new LoxFunction(_declaration, environment, _isInitialiser);
     }
 
     public override string ToString()

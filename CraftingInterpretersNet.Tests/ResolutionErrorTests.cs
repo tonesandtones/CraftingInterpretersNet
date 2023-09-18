@@ -55,6 +55,15 @@ public class ResolutionErrorTests
         yield return TestCase("return \"top level return\";", "Can't return from top-level code.");
         yield return TestCase("print this;", "Can't use 'this' outside of a class.");
         yield return TestCase("fun abc(){ var a = this; }", "Can't use 'this' outside of a class.");
+        yield return TestCase(
+            """
+            class Foo {
+              init() {
+                return "something else";
+              }
+            }
+            """,
+            "Can't return from an initialiser.");
     }
 
 

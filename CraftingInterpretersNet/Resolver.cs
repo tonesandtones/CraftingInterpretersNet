@@ -9,6 +9,7 @@ public class Resolver : BaseVisitor<object, object>
     {
         NONE,
         FUNCTION,
+        INITIALISER,
         METHOD
     }
 
@@ -39,7 +40,7 @@ public class Resolver : BaseVisitor<object, object>
     {
         var enclosingClass = _currentClass;
         _currentClass = ClassType.CLASS;
-        
+
         Declare(stmt.Name);
         Define(stmt.Name);
 
@@ -48,7 +49,9 @@ public class Resolver : BaseVisitor<object, object>
 
         foreach (var method in stmt.Methods)
         {
-            var declaration = FunctionType.METHOD;
+            var declaration = method.Name.Lexeme.Equals("init")
+                ? FunctionType.INITIALISER
+                : FunctionType.METHOD;
             ResolveFunction(method, declaration);
         }
 
@@ -78,7 +81,7 @@ public class Resolver : BaseVisitor<object, object>
             _errorReporter.Error(expr.Keyword, "Can't use 'this' outside of a class.");
             return null;
         }
-        
+
         ResolveLocal(expr, expr.Keyword);
         return null;
     }
@@ -212,7 +215,15 @@ public class Resolver : BaseVisitor<object, object>
             _errorReporter.Error(stmt.Keyword, "Can't return from top-level code.");
         }
 
-        if (stmt.Value != null) Resolve(stmt.Value);
+        if (stmt.Value == null) return null;
+
+        if (_currentFunction == FunctionType.INITIALISER)
+        {
+            _errorReporter.Error(stmt.Keyword, "Can't return from an initialiser.");
+        }
+
+        Resolve(stmt.Value);
+
         return null;
     }
 
