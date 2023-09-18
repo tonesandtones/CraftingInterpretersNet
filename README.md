@@ -25,4 +25,4 @@ A Lox implementation in C# written while following along to https://craftinginte
 ## Where I'm up to (what's next to work on)
 
 * `jlox` implementation is done!
-* Next up, the bytecode-based implementation (if I ever get around to it 😬)
+* Next up, the bytecode-based implementation (if I ever get around to it 😬) https://craftinginterpreters.com/a-bytecode-virtual-machine.html
