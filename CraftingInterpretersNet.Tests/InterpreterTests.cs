@@ -173,6 +173,21 @@ public class InterpreterTests
             "global", "global");
         yield return TestCase("""class Bacon{eat(){print "om nom nom";}} Bacon().eat();""", "om nom nom");
         yield return TestCase("""class Bacon{eat(){print "om nom nom";}} print Bacon().eat;""", "<fn eat>");
+        yield return TestCase(
+            """
+            class Say {
+              init() {
+                this.something = "I Am Tones";
+              }
+              SayIt() {
+                print ("Hello, " + this.something);
+              }
+            }
+
+            var a = Say();
+            a.SayIt();
+            """,
+            "Hello, I Am Tones");
     }
 
     [Fact]

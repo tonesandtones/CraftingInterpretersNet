@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CraftingInterpretersNet;
+namespace CraftingInterpretersNet.Internals;
 
 public class ClockCallable : ILoxCallable
 {

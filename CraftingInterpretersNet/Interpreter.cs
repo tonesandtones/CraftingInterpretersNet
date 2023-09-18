@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using CraftingInterpretersNet.Abstractions;
+using CraftingInterpretersNet.Internals;
 using static CraftingInterpretersNet.Abstractions.TokenType;
 
 namespace CraftingInterpretersNet;
@@ -85,6 +86,11 @@ public class Interpreter : BaseVisitor<object, object?>
         var value = Evaluate(expr.Value);
         instance.Set(expr.Name, value);
         return value;
+    }
+
+    public override object? VisitThisExpr(Expr.This expr)
+    {
+        return LookupVariable(expr.Keyword, expr);
     }
 
     public override object? VisitBlockStmt(Stmt.Block stmt)

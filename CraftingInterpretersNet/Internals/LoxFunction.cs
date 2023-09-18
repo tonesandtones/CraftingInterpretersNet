@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using CraftingInterpretersNet.Abstractions;
 
-namespace CraftingInterpretersNet;
+namespace CraftingInterpretersNet.Internals;
 
 public class LoxFunction : ILoxCallable
 {
@@ -35,6 +35,13 @@ public class LoxFunction : ILoxCallable
     }
 
     public int Arity => _declaration.Par.Count;
+
+    public LoxFunction Bind(LoxInstance instance)
+    {
+        Environment environment = new(_closure);
+        environment.Define("this", instance);
+        return new LoxFunction(_declaration, environment);
+    }
 
     public override string ToString()
     {

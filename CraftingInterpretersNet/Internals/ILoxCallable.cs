@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CraftingInterpretersNet;
+namespace CraftingInterpretersNet.Internals;
 
 public interface ILoxCallable
 {

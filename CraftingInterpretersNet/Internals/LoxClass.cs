@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CraftingInterpretersNet;
+namespace CraftingInterpretersNet.Internals;
 
 public class LoxClass : ILoxCallable
 {
@@ -19,11 +19,13 @@ public class LoxClass : ILoxCallable
         return Name;
     }
 
-    public int Arity => 0;
+    public int Arity => FindMethod("init")?.Arity ?? 0;
 
     public object? Call(Interpreter interpreter, List<object> arguments)
     {
         var instance = new LoxInstance(this);
+        var initialiser = FindMethod("init");
+        initialiser?.Bind(instance).Call(interpreter, arguments);
         return instance;
     }
 

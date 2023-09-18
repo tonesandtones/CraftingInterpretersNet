@@ -53,6 +53,8 @@ public class ResolutionErrorTests
             "Already a variable with this name in this scope."
         );
         yield return TestCase("return \"top level return\";", "Can't return from top-level code.");
+        yield return TestCase("print this;", "Can't use 'this' outside of a class.");
+        yield return TestCase("fun abc(){ var a = this; }", "Can't use 'this' outside of a class.");
     }
 
 

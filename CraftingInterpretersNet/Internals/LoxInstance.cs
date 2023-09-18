@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using CraftingInterpretersNet.Abstractions;
 
-namespace CraftingInterpretersNet;
+namespace CraftingInterpretersNet.Internals;
 
 public class LoxInstance
 {
@@ -24,7 +24,7 @@ public class LoxInstance
         if (_fields.TryGetValue(name.Lexeme, out var field)) return field;
 
         var method = _klass.FindMethod(name.Lexeme);
-        if (method != null) return method;
+        if (method != null) return method.Bind(this);
 
         throw new RuntimeError(name, $"Undefined property '{name.Lexeme}'.");
     }

@@ -11,12 +11,19 @@ public class Resolver : BaseVisitor<object, object>
         FUNCTION,
         METHOD
     }
-    
+
+    private enum ClassType
+    {
+        NONE,
+        CLASS
+    }
+
     private readonly IErrorReporter _errorReporter;
     private readonly Interpreter _interpreter;
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
 
     private FunctionType _currentFunction = FunctionType.NONE;
+    private ClassType _currentClass = ClassType.NONE;
 
     public Resolver(Interpreter interpreter) : this(interpreter, Defaults.DefaultErrorReporter)
     {
@@ -30,21 +37,30 @@ public class Resolver : BaseVisitor<object, object>
 
     public override object? VisitClassStmt(Stmt.Class stmt)
     {
+        var enclosingClass = _currentClass;
+        _currentClass = ClassType.CLASS;
+        
         Declare(stmt.Name);
         Define(stmt.Name);
+
+        BeginScope();
+        _scopes.Peek()["this"] = true;
 
         foreach (var method in stmt.Methods)
         {
             var declaration = FunctionType.METHOD;
             ResolveFunction(method, declaration);
         }
-        
+
+        EndScope();
+
+        _currentClass = enclosingClass;
         return null;
     }
 
     public override object? VisitGetExpr(Expr.Get expr)
     {
-        Resolve(expr.Obj); 
+        Resolve(expr.Obj);
         return null;
     }
 
@@ -52,6 +68,18 @@ public class Resolver : BaseVisitor<object, object>
     {
         Resolve(expr.Value);
         Resolve(expr.Obj);
+        return null;
+    }
+
+    public override object? VisitThisExpr(Expr.This expr)
+    {
+        if (_currentClass == ClassType.NONE)
+        {
+            _errorReporter.Error(expr.Keyword, "Can't use 'this' outside of a class.");
+            return null;
+        }
+        
+        ResolveLocal(expr, expr.Keyword);
         return null;
     }
 
@@ -183,6 +211,7 @@ public class Resolver : BaseVisitor<object, object>
         {
             _errorReporter.Error(stmt.Keyword, "Can't return from top-level code.");
         }
+
         if (stmt.Value != null) Resolve(stmt.Value);
         return null;
     }
@@ -250,7 +279,7 @@ public class Resolver : BaseVisitor<object, object>
     {
         var enclosingFunctionType = _currentFunction;
         _currentFunction = type;
-        
+
         BeginScope();
         foreach (var param in function.Par)
         {
@@ -260,7 +289,7 @@ public class Resolver : BaseVisitor<object, object>
 
         Resolve(function.Body);
         EndScope();
-        
+
         _currentFunction = enclosingFunctionType;
     }
 
