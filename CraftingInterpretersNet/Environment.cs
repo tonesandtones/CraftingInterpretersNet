@@ -6,7 +6,7 @@ namespace CraftingInterpretersNet;
 public class Environment
 {
     private readonly Dictionary<string, object?> _values = new();
-    private readonly Environment? _enclosing;
+    public Environment? Enclosing { get; }
 
     public Environment() : this(null)
     {
@@ -14,7 +14,7 @@ public class Environment
 
     public Environment(Environment? enclosing)
     {
-        _enclosing = enclosing;
+        Enclosing = enclosing;
     }
 
     public void Define(string name, object? value)
@@ -30,7 +30,7 @@ public class Environment
         }
 
         //We can't just do _enclosing?.Get(name) because we need to throw if there is no enclosing environment.
-        if (_enclosing != null) return _enclosing.Get(name);
+        if (Enclosing != null) return Enclosing.Get(name);
 
         throw new RuntimeError(name, $"Undefined variable '{name.Lexeme}'.");
     }
@@ -43,9 +43,9 @@ public class Environment
             return;
         }
 
-        if (_enclosing != null)
+        if (Enclosing != null)
         {
-            _enclosing.Assign(name, value);
+            Enclosing.Assign(name, value);
             return;
         }
 
@@ -62,7 +62,7 @@ public class Environment
         var environment = this;
         for (var i = 0; i < distance; i++)
         {
-            environment = environment?._enclosing;
+            environment = environment?.Enclosing;
         }
 
         return environment;

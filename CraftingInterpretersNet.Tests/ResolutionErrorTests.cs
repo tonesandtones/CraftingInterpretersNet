@@ -70,6 +70,17 @@ public class ResolutionErrorTests
             }
             """,
             "A class can't inherit from itself.");
+        yield return TestCase(
+            """
+            class Eclair {
+              cook() {
+                super.cook();
+                print "Pipe full of crème pâtissière.";
+              }
+            }
+            """,
+            "Can't use 'super' in a class with no superclass.");
+        yield return TestCase("super.NotInAClass();", "Can't use 'super' outside of a class.");
     }
 
 

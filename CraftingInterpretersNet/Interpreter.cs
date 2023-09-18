@@ -67,6 +67,12 @@ public class Interpreter : BaseVisitor<object, object?>
 
         _environment.Define(stmt.Name.Lexeme, null);
 
+        if (stmt.Superclass != null)
+        {
+            _environment = new Environment(_environment);
+            _environment.Define("super", superclass);
+        }
+
         Dictionary<string, LoxFunction> methods = new();
         foreach (var method in stmt.Methods)
         {
@@ -75,6 +81,7 @@ public class Interpreter : BaseVisitor<object, object?>
         }
 
         var klass = new LoxClass(stmt.Name.Lexeme, (LoxClass?)superclass, methods);
+        if (superclass != null) _environment = _environment.Enclosing!;
         _environment.Assign(stmt.Name, klass);
         return null;
     }
@@ -97,6 +104,21 @@ public class Interpreter : BaseVisitor<object, object?>
         var value = Evaluate(expr.Value);
         instance.Set(expr.Name, value);
         return value;
+    }
+
+    public override object? VisitSuperExpr(Expr.Super expr)
+    {
+        var distance = _locals[expr];
+        var superclass = (LoxClass)_environment.GetAt(distance, "super")!;
+        var @object = (LoxInstance)_environment.GetAt(distance - 1, "this")!;
+    
+        var method = superclass.FindMethod(expr.Method.Lexeme);
+        if (method == null)
+        {
+            throw new RuntimeError(expr.Method, $"Undefined property '{expr.Method.Lexeme}'.");
+        }
+    
+        return method.Bind(@object);
     }
 
     public override object? VisitThisExpr(Expr.This expr)

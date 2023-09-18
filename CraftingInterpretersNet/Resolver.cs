@@ -16,7 +16,8 @@ public class Resolver : BaseVisitor<object, object>
     private enum ClassType
     {
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS,
     }
 
     private readonly IErrorReporter _errorReporter;
@@ -51,7 +52,14 @@ public class Resolver : BaseVisitor<object, object>
 
         if (stmt.Superclass != null)
         {
+            _currentClass = ClassType.SUBCLASS;
             Resolve(stmt.Superclass);
+        }
+
+        if (stmt.Superclass != null)
+        {
+            BeginScope();
+            _scopes.Peek()["super"] = true;
         }
 
         BeginScope();
@@ -67,6 +75,8 @@ public class Resolver : BaseVisitor<object, object>
 
         EndScope();
 
+        if (stmt.Superclass != null) EndScope();
+
         _currentClass = enclosingClass;
         return null;
     }
@@ -81,6 +91,20 @@ public class Resolver : BaseVisitor<object, object>
     {
         Resolve(expr.Value);
         Resolve(expr.Obj);
+        return null;
+    }
+
+    public override object? VisitSuperExpr(Expr.Super expr)
+    {
+        if (_currentClass == ClassType.NONE)
+        {
+            _errorReporter.Error(expr.Keyword, "Can't use 'super' outside of a class.");
+        } else if (_currentClass != ClassType.SUBCLASS)
+        {
+            _errorReporter.Error(expr.Keyword, "Can't use 'super' in a class with no superclass.");
+        }
+
+        ResolveLocal(expr, expr.Keyword);
         return null;
     }
 
