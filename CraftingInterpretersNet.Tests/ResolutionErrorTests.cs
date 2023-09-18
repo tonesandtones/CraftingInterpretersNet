@@ -64,6 +64,12 @@ public class ResolutionErrorTests
             }
             """,
             "Can't return from an initialiser.");
+        yield return TestCase(
+            """
+            class Abc < Abc {
+            }
+            """,
+            "A class can't inherit from itself.");
     }
 
 

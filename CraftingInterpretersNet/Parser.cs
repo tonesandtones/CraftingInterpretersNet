@@ -58,6 +58,14 @@ public class Parser
     private Stmt ClassDeclaration()
     {
         var name = Consume(IDENTIFIER, "Expect class name.");
+
+        Expr.Variable? superclass = null;
+        if (Match(LESS))
+        {
+            Consume(IDENTIFIER, "Expect superclass name.");
+            superclass = new Expr.Variable(Previous());
+        }
+        
         Consume(LEFT_BRACE, "Expect '{' before class body.");
 
         List<Stmt.Function> methods = new();
@@ -68,7 +76,7 @@ public class Parser
 
         Consume(RIGHT_BRACE, "Expect '}' after class body.");
 
-        return new Stmt.Class(name, null, methods);
+        return new Stmt.Class(name, superclass, methods);
     }
 
     private Stmt.Function Function(string kind)
@@ -395,6 +403,14 @@ public class Parser
         if (Match(NIL)) return new Expr.Literal(null);
 
         if (Match(NUMBER, STRING)) return new Expr.Literal(Previous().Literal);
+
+        if (Match(SUPER))
+        {
+            var keyword = Previous();
+            Consume(DOT, "Expect '.' after 'super'.");
+            var method = Consume(IDENTIFIER, "Expect superclass method name.");
+            return new Expr.Super(keyword, method);
+        }
 
         if (Match(THIS)) return new Expr.This(Previous());
 

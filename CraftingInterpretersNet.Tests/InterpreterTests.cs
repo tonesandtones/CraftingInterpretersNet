@@ -214,6 +214,60 @@ public class InterpreterTests
             Foo();
             """,
             "a");
+        yield return TestCase(
+            """
+            class Doughnut {
+              cook() {
+                print "Fry until golden brown.";
+              }
+            }
+            
+            class BostonCream < Doughnut {}
+            
+            BostonCream().cook();
+            """,
+            "Fry until golden brown.");
+         yield return TestCase(
+             """
+             class Doughnut {
+               cook() {
+                 print "Fry until golden brown.";
+               }
+             }
+
+             class BostonCream < Doughnut {
+               cook() {
+                 super.cook();
+                 print "Pipe full of custard and coat with chocolate.";
+               }
+             }
+
+             BostonCream().cook();
+             """,
+             "Fry until golden brown.", "Pipe full of custard and coat with chocolate.");
+        yield return TestCase( //correct resolution of super. target
+            """
+            class A {
+              method() {
+                print "A method";
+              }
+            }
+
+            class B < A {
+              method() {
+                print "B method";
+              }
+            
+              test() {
+                super.method();
+              }
+            }
+
+            class C < B {}
+
+            C().test();
+            """,
+            "A method");
     }
 
     [Fact]
@@ -248,6 +302,13 @@ public class InterpreterTests
         yield return TestCase("nil * 1;", "Operands must be numbers.");
         yield return TestCase("-nil;", "Operand must be a number.");
         yield return TestCase("xyz = 1;", "Undefined variable 'xyz'.");
+        yield return TestCase(
+            """
+            var Abc = 123;
+            class Def < Abc {
+            }
+            """,
+            "Superclass must be a class.");
     }
 
     private void Interpret(string lox)

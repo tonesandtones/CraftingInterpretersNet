@@ -23,7 +23,7 @@ public class Interpreter : BaseVisitor<object, object?>
         _errorReporter = errorReporter;
         _sink = sink;
         _environment = _globals;
-        
+
         _globals.Define("clock", new ClockCallable());
     }
 
@@ -54,6 +54,17 @@ public class Interpreter : BaseVisitor<object, object?>
 
     public override object? VisitClassStmt(Stmt.Class stmt)
     {
+        object? superclass = null;
+        if (stmt.Superclass != null)
+        {
+            superclass = Evaluate(stmt.Superclass);
+
+            if (superclass is not LoxClass)
+            {
+                throw new RuntimeError(stmt.Superclass.Name, "Superclass must be a class.");
+            }
+        }
+
         _environment.Define(stmt.Name.Lexeme, null);
 
         Dictionary<string, LoxFunction> methods = new();
@@ -62,8 +73,8 @@ public class Interpreter : BaseVisitor<object, object?>
             LoxFunction function = new(method, _environment, method.Name.Lexeme.Equals("init"));
             methods[method.Name.Lexeme] = function;
         }
-        
-        LoxClass klass = new LoxClass(stmt.Name.Lexeme, methods);
+
+        var klass = new LoxClass(stmt.Name.Lexeme, (LoxClass?)superclass, methods);
         _environment.Assign(stmt.Name, klass);
         return null;
     }
@@ -99,7 +110,7 @@ public class Interpreter : BaseVisitor<object, object?>
         return null;
     }
 
-    internal void ExecuteBlock(List<Stmt> statements, Environment environment) 
+    internal void ExecuteBlock(List<Stmt> statements, Environment environment)
     {
         var previous = _environment;
         try
@@ -168,7 +179,7 @@ public class Interpreter : BaseVisitor<object, object?>
         {
             _globals.Assign(expr.Name, value);
         }
-        
+
         return value;
     }
 
@@ -190,7 +201,7 @@ public class Interpreter : BaseVisitor<object, object?>
         {
             throw new RuntimeError(expr.Paren, $"Expected {lc.Arity} arguments but got {arguments.Count}.");
         }
-        
+
         return lc.Call(this, arguments);
     }
 
@@ -218,7 +229,7 @@ public class Interpreter : BaseVisitor<object, object?>
     {
         object? value = null;
         if (stmt.Value != null) value = Evaluate(stmt.Value);
-        
+
         throw new Return(value);
     }
 

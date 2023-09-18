@@ -7,11 +7,13 @@ public class LoxClass : ILoxCallable
     public string Name { get; private set; }
 
     private readonly Dictionary<string, LoxFunction> _methods;
+    private readonly LoxClass? _superclass;
 
-    public LoxClass(string name, Dictionary<string, LoxFunction> methods)
+    public LoxClass(string name, LoxClass? superclass, Dictionary<string, LoxFunction> methods)
     {
         Name = name;
         _methods = methods;
+        _superclass = superclass;
     }
 
     public override string ToString()
@@ -31,6 +33,6 @@ public class LoxClass : ILoxCallable
 
     public LoxFunction? FindMethod(string name)
     {
-        return _methods.TryGetValue(name, out var method) ? method : null;
+        return _methods.TryGetValue(name, out var method) ? method : _superclass?.FindMethod(name);
     }
 }
