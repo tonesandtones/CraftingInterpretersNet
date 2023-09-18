@@ -22,3 +22,7 @@ A Lox implementation in C# written while following along to https://craftinginte
 ## Implementation differences
 * `Expr` and `Stmt` classes generated with a C# Source Generator, `CraftingInterpretersNet.Generator`
 
+## Where I'm up to (what's next to work on)
+
+* `jlolox` implementation is mostly done, just a little bit left to do to wrap up jlox (but in C# obviously 😁)
+* https://craftinginterpreters.com/classes.html#this
