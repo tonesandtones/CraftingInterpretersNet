@@ -1,1 +1,4 @@
 ﻿* text=auto
+
+# clox files intended to be used under WSL so use linux LF line endings.
+/clox/* text eol=lf
