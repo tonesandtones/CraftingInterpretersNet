@@ -26,4 +26,4 @@ A Lox implementation in C# written while following along to https://craftinginte
 
 * `jlox` implementation is done!
 * `clox` implementation is underway, see [./clox](./clox)
-* Second chapter of clox is done, we can do arithmetic! Up to https://craftinginterpreters.com/scanning-on-demand.html
+* Third chapter of clox is done, the scanner is done? Up to https://craftinginterpreters.com/compiling-expressions.html
