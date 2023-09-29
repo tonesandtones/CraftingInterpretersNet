@@ -26,4 +26,4 @@ A Lox implementation in C# written while following along to https://craftinginte
 
 * `jlox` implementation is done!
 * `clox` implementation is underway, see [./clox](./clox)
-* The very first bits of clox are done, https://craftinginterpreters.com/chunks-of-bytecode.html#constants
+* First chapter of clox is done, up to https://craftinginterpreters.com/a-virtual-machine.html
