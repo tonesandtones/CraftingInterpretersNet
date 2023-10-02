@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include "scanner.h"
 
-void compile(const char* source){
+void compile(const char* source) {
     initScanner(source);
 
     int line = -1;
-    for (;;){
+    for (;;) {
         Token token = scanToken();
-        if(token.line != line){
-            printf("%4d", token.line);
+        if (token.line != line) {
+            printf("%4d ", token.line);
             line = token.line;
         } else {
             printf("   | ");
