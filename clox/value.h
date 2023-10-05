@@ -38,6 +38,8 @@ typedef struct {
     Value* values;
 } ValueArray;
 
+bool valuesEqual(Value a, Value b);
+
 //Initialise members of a ValueArray to valid initial state
 void initValueArray(ValueArray* array);
 
