@@ -26,4 +26,4 @@ A Lox implementation in C# written while following along to https://craftinginte
 
 * `jlox` implementation is done!
 * `clox` implementation is underway, see [./clox](./clox)
-* Fifth chapter of clox is done, we've got nil and boolean types and comparison operators! - https://craftinginterpreters.com/strings.html
+* We have strings! Up next, the beginnings of a garbage collector - https://craftinginterpreters.com/strings.html#freeing-objects
