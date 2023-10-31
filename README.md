@@ -26,4 +26,4 @@ A Lox implementation in C# written while following along to https://craftinginte
 
 * `jlox` implementation is done!
 * `clox` implementation is underway, see [./clox](./clox)
-* We have the beginnings of a garbage collector - https://craftinginterpreters.com/hash-tables.html#deleting-entries
+* We have the beginnings of a garbage collector. On to global variables - https://craftinginterpreters.com/global-variables.html
